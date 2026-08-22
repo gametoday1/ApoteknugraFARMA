@@ -1,5 +1,4 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const nodemailer = require('nodemailer');
 
@@ -10,37 +9,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-// Konfigurasi Database SQLite Lokal
-const dbFile = path.join(__dirname, 'database.sqlite');
-const db = new sqlite3.Database(dbFile, (err) => {
-    if (err) {
-        console.error('Gagal buka database:', err.message);
-    } else {
-        console.log('Terhubung ke database SQLite.');
-    }
-});
+// Database Sementara di Memori (Aman, Tanpa Crash, Tanpa File Eksternal)
+let usersList = [
+    { email: 'admin@test.com', password: 'password123', role: 'owner' }
+];
 
-// Inisialisasi Tabel Users & Akun Default Owner
-db.serialize(() => {
-    db.run(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL
-        )
-    `, () => {
-        // Buat akun default otomatis jika belum ada
-        db.get(`SELECT * FROM users WHERE email = ?`, ['admin@test.com'], (err, row) => {
-            if (!row) {
-                db.run(`INSERT INTO users (email, password, role) VALUES (?, ?, ?)`, 
-                    ['admin@test.com', 'password123', 'owner']);
-            }
-        });
-    });
-});
-
-// Route Utama (Membuka Aplikasi)
+// Route Utama Membuka Aplikasi
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'APOTEK-FINAL.html'));
 });
@@ -48,33 +22,28 @@ app.get('/', (req, res) => {
 // Endpoint Login
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    db.get(`SELECT * FROM users WHERE email = ? AND password = ?`, [email, password], (err, row) => {
-        if (err) {
-            return res.status(500).json({ success: false, message: "Terjadi kesalahan server." });
-        }
-        if (!row) {
-            return res.status(401).json({ success: false, message: "Email atau password salah!" });
-        }
-        res.json({ success: true, message: "Login berhasil!", role: row.role });
-    });
+    const user = usersList.find(u => u.email === email && u.password === password);
+    
+    if (!user) {
+        return res.status(401).json({ success: false, message: "Email atau password salah!" });
+    }
+    res.json({ success: true, message: "Login berhasil!", role: user.role });
 });
 
-// Endpoint Daftar Akun Baru (Register)
+// Endpoint Register Akun Baru
 app.post('/register', (req, res) => {
     const { email, password, role } = req.body;
     if (!email || !password) {
         return res.status(400).json({ success: false, message: "Email dan password wajib diisi!" });
     }
-    
-    db.run(`INSERT INTO users (email, password, role) VALUES (?, ?, ?)`, 
-        [email, password, role || 'kasir'], 
-        function(err) {
-            if (err) {
-                return res.status(400).json({ success: false, message: "Email sudah terdaftar!" });
-            }
-            res.json({ success: true, message: "Akun berhasil didaftarkan! Silakan login." });
-        }
-    );
+
+    const existingUser = usersList.find(u => u.email === email);
+    if (existingUser) {
+        return res.status(400).json({ success: false, message: "Email sudah terdaftar!" });
+    }
+
+    usersList.push({ email, password, role: role || 'kasir' });
+    res.json({ success: true, message: "Akun berhasil didaftarkan! Silakan login." });
 });
 
 // Endpoint Kirim Email Laporan
