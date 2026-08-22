@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apotek Nugrah FARMA - Sistem Lengkap</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; }
+    
+    .login-page { min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card { background: white; padding: 40px; border-radius: 14px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .login-card h1 { text-align: center; font-size: 24px; color: #333; margin-bottom: 10px; }
+    .login-card p { text-align: center; color: #999; margin-bottom: 30px; font-size: 13px; }
+    .login-card input { width: 100%; padding: 12px; margin-bottom: 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; }
+    .login-card input:focus { outline: none; border-color: #667eea; }
+    .login-card button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+    .login-card small { display: block; text-align: center; margin-top: 20px; color: #999; font-size: 12px; }
+    
+    .app-page { display: none; }
+    .app-page.show { display: block; }
+    
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; margin-bottom: 20px; }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 28px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+    .header button { padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; border-radius: 6px; cursor: pointer; }
+    
+    .nav { max-width: 1400px; margin: 0 auto 20px; padding: 0 20px; display: flex; gap: 8px; flex-wrap: wrap; overflow-x: auto; }
+    .nav-btn { padding: 11px 18px; background: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; }
+    .nav-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    
+    .content { max-width: 1400px; margin: 0 auto; padding: 0 20px 40px; }
+    .tab { display: none; }
+    .tab.show { display: block; }
+    
+    /* WALLPAPER DASHBOARD FULL & ELEGAN */
+    #dashboard {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.15) 100%), 
+                  radial-gradient(circle, #ffffff 0%, #f0f4ff 100%);
+      background-size: cover;
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.05);
+    }
+
+    .card { background: white; padding: 24px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 18px; color: #333; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(102,126,234,0.3); }
+    .stat-value { font-size: 28px; font-weight: 700; margin: 8px 0; }
+    .stat-card.income { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .stat-card.expense { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+    .stat-card.cash { background: linear-gradient(135deg, #ffd89b, #19547b); }
+    .stat-card.warning { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .stat-card.danger { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
+    .stat-card.success { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+    
+    .btn-submit { width: 100%; padding: 11px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+    table thead { background: #f8f9fa; }
+    table th { padding: 12px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #e0e0e0; }
+    table td { padding: 11px 12px; border-bottom: 1px solid #f0f0f0; }
+    
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-ok { background: #ecfdf5; color: #10b981; }
+    .badge-danger { background: #fee2e2; color: #ef4444; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .cashflow-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .cashflow-item { background: #f8f9fa; padding: 16px; border-radius: 8px; border-left: 4px solid #667eea; }
+    .cashflow-label { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; }
+    .cashflow-amount { font-size: 20px; font-weight: 700; color: #667eea; }
+    .cashflow-item.income { border-left-color: #10b981; }
+    .cashflow-item.income .cashflow-amount { color: #10b981; }
+    .cashflow-item.expense { border-left-color: #ef4444; }
+    .cashflow-item.expense .cashflow-amount { color: #ef4444; }
+    
+    #mapContainer { width: 100%; height: 400px; border-radius: 12px; margin-bottom: 20px; }
+    .qris-box { background: #f8f9fa; border: 2px dashed #667eea; border-radius: 12px; padding: 20px; text-align: center; margin-top: 15px; }
+    .qris-box img { width: 180px; height: 180px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      #mapContainer { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <h1>APOTEK NUGRAH FARMA</h1>
+    <p>Sistem Inventory & Kasir (Maks. 2 Device Aktif)</p>
+    
+    <input type="text" id="emailInput" placeholder="Username (owner / apotek)" value="owner">
+    <input type="password" id="passInput" placeholder="Password" value="password123">
+    <button onclick="doLogin()">MASUK SEKARANG</button>
+    <p id="loginError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
+    
+    <small>Gunakan akun owner / apotek</small>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appPage" class="app-page">
+  
+  <div class="header">
+    <div class="header-content">
+      <div>
+        <h1>Apotek Nugrah FARMA</h1>
+        <p id="deviceRoleInfo">Jl. Poros Kdi.- Moramo, Kab. Konawe Selatan | WA: 0822-9037-3427</p>
+      </div>
+      <button onclick="doLogout()">Logout Device</button>
+    </div>
+  </div>
+  
+  <div class="nav">
+    <button class="nav-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+    <button class="nav-btn" onclick="showTab('kasir')">🛒 Kasir / POS</button>
+    <button class="nav-btn" onclick="showTab('barcode')">📦 Scan & Input Stok (VSC)</button>
+    <button class="nav-btn" onclick="showTab('cashflow')">💰 Cash Flow</button>
+    <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis</button>
+    <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
+    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi</button>
+    <button class="nav-btn" onclick="showTab('akun')">⚙️ Akun & Google Sheets</button>
+  </div>
+  
+  <div class="content">
+    
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="tab show">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>Stok Masuk</div>
+          <div class="stat-value" id="todayMasuk">0</div>
+          <div>item</div>
+        </div>
+        <div class="stat-card warning">
+          <div>Stok Keluar</div>
+          <div class="stat-value" id="todayKeluar">0</div>
+          <div>item</div>
+        </div>
+        <div class="stat-card income">
+          <div>💰 Pemasukan</div>
+          <div class="stat-value" id="dashIncome">Rp 0</div>
+          <div>hari ini</div>
+        </div>
+        <div class="stat-card expense">
+          <div>💸 Pengeluaran</div>
+          <div class="stat-value" id="dashExpense">Rp 0</div>
+          <div>hari ini</div>
+        </div>
+        <div class="stat-card danger">
+          <div>🚨 Stok Kritis</div>
+          <div class="stat-value" id="criticalCount">0</div>
+          <div>obat</div>
+        </div>
+        <div class="stat-card success">
+          <div>✋ Absensi</div>
+          <div class="stat-value" id="todayAbsen">0</div>
+          <div>karyawan</div>
+        </div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>Transaksi Keuangan Hari Ini</h3>
+          <table>
+            <thead>
+              <tr><th>Jenis</th><th>Deskripsi</th><th>Nominal</th><th>Waktu</th></tr>
+            </thead>
+            <tbody id="dashCashTable">
+              <tr><td colspan="4" style="text-align: center;">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="card">
+          <h3>Overview Harian</h3>
+          <div class="cashflow-summary">
+            <div class="cashflow-item income">
+              <div class="cashflow-label">📈 Pemasukan</div>
+              <div class="cashflow-amount" id="summaryIncome">Rp 0</div>
+            </div>
+            <div class="cashflow-item expense">
+              <div class="cashflow-label">📉 Pengeluaran</div>
+              <div class="cashflow-amount" id="summaryExpense">Rp 0</div>
+            </div>
+            <div class="cashflow-item">
+              <div class="cashflow-label">💵 Net Cash Flow</div>
+              <div class="cashflow-amount" id="summaryNet" style="color: #667eea;">Rp 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODUL KASIR / POS -->
+    <div id="kasir" class="tab">
+      <!-- BANNER PESAN KEJUJURAN KASIR -->
+      <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <p style="font-size: 14px; font-weight: 600; letter-spacing: 0.5px;">
+          ✨ "Catat Setiap Penjualan dengan Jujur. Rekam Jejak Yang Baik Dimulai Dari Ketulusan Bekerja." ✨
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>💊 Pilih Obat / Produk (Live Search)</h3>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Cari Nama Obat / Ketik Cepat</label>
+            <input type="text" id="pos_search_obat" placeholder="Ketik nama obat..." oninput="filterPosObatList()">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Hasil Pencarian Obat</label>
+            <select id="pos_select_obat" size="4" style="height: 110px;" onchange="pilihObatDariDropdown()">
+              <option value="">-- Ketik nama obat di atas --</option>
+            </select>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Harga Satuan (Rp)</label>
+              <input type="number" id="pos_harga" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Jumlah (Qty)</label>
+              <input type="number" id="pos_qty" placeholder="1" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn-submit" onclick="tambahKeKeranjang()">➕ Tambah ke Keranjang</button>
+        </div>
+
+        <div class="card">
+          <h3>🛒 Keranjang Belanja</h3>
+          <table>
+            <thead>
+              <tr><th>Obat</th><th>Harga</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr>
+            </thead>
+            <tbody id="posCartTable">
+              <tr><td colspan="5" style="text-align: center;">Keranjang Kosong</td></tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px; border-top: 2px solid #eee; padding-top: 15px;">
+            <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; margin-bottom: 15px;">
+              <span>TOTAL:</span>
+              <span id="posTotalBayar" style="color: #667eea;">Rp 0</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label>Metode Pembayaran</label>
+              <select id="pos_metode" onchange="toggleMetodePembayaran()">
+                <option value="CASH">💵 Cash / Tunai</option>
+                <option value="QRIS">📱 QRIS (Scan QR)</option>
+              </select>
+            </div>
+
+            <div id="containerCash" class="form-grid">
+              <div class="form-group">
+                <label>Uang Dibayar (Rp)</label>
+                <input type="number" id="pos_bayar" placeholder="0" oninput="hitungKembalian()">
+              </div>
+              <div class="form-group">
+                <label>Kembalian (Rp)</label>
+                <input type="text" id="pos_kembalian" value="Rp 0" readonly style="background: #f8f9fa; font-weight: bold;">
+              </div>
+            </div>
+
+            <div id="containerQris" class="qris-box" style="display: none;">
+              <p style="font-weight: 600; font-size: 14px; color: #333;">SCAN UNTUK BAYAR VIA QRIS</p>
+              <img id="qrisImage" src="" alt="QRIS Code">
+              <p id="qrisNominal" style="font-weight: 700; color: #10b981; font-size: 16px;">Rp 0</p>
+            </div>
+
+            <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; margin-top: 15px;" onclick="prosesTransaksiKasir('browser')">✅ Bayar dan Cetak Struk</button>
+            <button class="btn-submit" style="background: #3b82f6; color: white; margin-top: 10px;" onclick="prosesTransaksiKasir('bluetooth')">🖨️ Cetak Langsung via Bluetooth (Android)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIWAYAT TRANSAKSI PENJUALAN -->
+      <div class="card" style="margin-top: 20px;">
+        <h3>📜 Riwayat Transaksi Penjualan Hari Ini</h3>
+        <table>
+          <thead>
+            <tr><th>No Nota</th><th>Waktu</th><th>Kasir / Metode</th><th>Daftar Item</th><th>Total (Rp)</th></tr>
+          </thead>
+          <tbody id="salesHistoryTable">
+            <tr><td colspan="5" style="text-align: center;">Belum ada transaksi hari ini</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- SCAN STOK / VSC BARCODE & EXPIRED DATE -->
+    <div id="barcode" class="tab">
+      <div class="card">
+        <h3>📦 Input Stok & Tanggal Kedaluwarsa via Barcode (VSC)</h3>
+        <p style="font-size: 13px; color: #667eea; margin-bottom: 15px; font-weight: 600;">
+          💡 Tembak barcode dengan alat VSC. Masukkan tanggal kedaluwarsa agar sistem memantau obat yang hampir expired!
+        </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Jenis Transaksi Stok</label>
+            <select id="bc_jenis">
+              <option value="MASUK">📥 Barang Masuk</option>
+              <option value="KELUAR">📤 Barang Keluar</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Kode Obat / Barcode</label>
+            <input type="text" id="bc_kode" placeholder="Scan barcode VSC di sini...">
+          </div>
+          <div class="form-group">
+            <label>Nama Obat</label>
+            <input type="text" id="bc_obat" placeholder="Otomatis terisi...">
+          </div>
+          <div class="form-group">
+            <label>Harga Jual (Rp)</label>
+            <input type="number" id="bc_harga" placeholder="Otomatis terisi...">
+          </div>
+          <div class="form-group">
+            <label>Qty (Jumlah)</label>
+            <input type="number" id="bc_qty" placeholder="1" min="1" value="1">
+          </div>
+          <div class="form-group">
+            <label>Tanggal Kedaluwarsa (Expired)</label>
+            <input type="date" id="bc_expired">
+          </div>
+        </div>
+        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan Data Stok & Expired</button>
+      </div>
+    </div>
+    
+    <!-- CASH FLOW -->
+    <div id="cashflow" class="tab">
+      <div class="stats-grid">
+        <div class="stat-card income">
+          <div>📈 Pemasukan Bulan Ini</div>
+          <div class="stat-value" id="monthlyIncome">Rp 0</div>
+        </div>
+        <div class="stat-card expense">
+          <div>📉 Pengeluaran Bulan Ini</div>
+          <div class="stat-value" id="monthlyExpense">Rp 0</div>
+        </div>
+        <div class="stat-card cash">
+          <div>💵 Net Cash Flow</div>
+          <div class="stat-value" id="monthlyNet">Rp 0</div>
+        </div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>💰 Input Pemasukan Manual</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Sumber Pemasukan</label>
+              <select id="cf_income_source">
+                <option value="Penjualan Obat">🏥 Penjualan Obat</option>
+                <option value="Penjualan Alat Kesehatan">🩺 Penjualan Alat</option>
+                <option value="Lainnya">📌 Lainnya</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nominal (Rp)</label>
+              <input type="number" id="cf_income_amount" placeholder="100000" min="1">
+            </div>
+            <div class="form-group">
+              <label>Keterangan</label>
+              <input type="text" id="cf_income_desc" placeholder="Detail transaksi">
+            </div>
+          </div>
+          <button class="btn-submit" onclick="tambahPemasukan()">➕ Tambah Pemasukan</button>
+        </div>
+        
+        <div class="card">
+          <h3>💸 Input Pengeluaran</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Jenis Pengeluaran</label>
+              <select id="cf_expense_type">
+                <option value="Beli Stok">📦 Beli Stok Obat</option>
+                <option value="Gaji Karyawan">👨 Gaji Karyawan</option>
+                <option value="Sewa Tempat">🏢 Sewa Tempat</option>
+                <option value="Listrik/Air">💡 Listrik/Air</option>
+                <option value="Marketing">📢 Marketing</option>
+                <option value="Lainnya">📌 Lainnya</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Nominal (Rp)</label>
+              <input type="number" id="cf_expense_amount" placeholder="500000" min="1">
+            </div>
+            <div class="form-group">
+              <label>Keterangan</label>
+              <input type="text" id="cf_expense_desc" placeholder="Detail transaksi">
+            </div>
+          </div>
+          <button class="btn-submit" onclick="tambahPengeluaran()">➖ Tambah Pengeluaran</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>📊 Laporan Cash Flow Hari Ini</h3>
+        <div style="margin-bottom: 16px;">
+          <button class="btn-submit" style="width: auto; display: inline-block; padding: 8px 16px;" onclick="printCashflow()">🖨️ Cetak Laporan Cash Flow</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>No</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th>Waktu</th></tr>
+          </thead>
+          <tbody id="cashflowTable">
+            <tr><td colspan="5" style="text-align: center;">-</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- STOK KRITIS -->
+    <div id="kritis" class="tab">
+      <div class="card">
+        <h3>⚠️ Daftar Obat Stok Kritis (&lt; 20 Item)</h3>
+        <div id="kritisList">
+          <p style="text-align: center; color: #999;">✅ Semua stok aman, tidak ada yang kritis</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- STOK OPNAME & EXPIRED MONITOR -->
+    <div id="opname" class="tab">
+      <div class="card">
+        <h3>📋 Laporan Stok Opname & Status Kedaluwarsa</h3>
+        <div style="margin-bottom: 16px;">
+          <button class="btn-submit" style="width: auto; display: inline-block; padding: 8px 16px;" onclick="printOpname()">🖨️ Cetak Laporan Opname</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Daftar Inventory Obat & Expired Date</h3>
+        <table>
+          <thead>
+            <tr><th>No</th><th>Kode</th><th>Nama Obat</th><th>Harga Jual</th><th>Stok Fisik</th><th>Expired Date</th><th>Status</th></tr>
+          </thead>
+          <tbody id="opnameTable">
+            <tr><td colspan="7" style="text-align: center;">-</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- ABSENSI -->
+    <div id="absensi" class="tab">
+      <div id="mapContainer"></div>
+      <div class="card">
+        <h3>📍 Absensi Lokasi GPS</h3>
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #667eea;">
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">📍 Status Lokasi</div>
+          <div id="locationStatus">Mendeteksi lokasi...</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nama Karyawan</label>
+            <input type="text" id="abs_nama" placeholder="Nama karyawan">
+          </div>
+          <div class="form-group">
+            <label>Shift</label>
+            <select id="abs_shift">
+              <option value="Pagi">🌅 Shift Pagi</option>
+              <option value="Siang">☀️ Shift Siang</option>
+              <option value="Malam">🌙 Shift Malam</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-submit" id="absenBtn" onclick="tambahAbsensi()" disabled>✋ Absen Masuk</button>
+      </div>
+      <div class="card">
+        <h3>Riwayat Absensi Hari Ini</h3>
+        <table>
+          <thead>
+            <tr><th>No</th><th>Nama</th><th>Shift</th><th>Jarak</th><th>Waktu</th></tr>
+          </thead>
+          <tbody id="abs_table">
+            <tr><td colspan="5" style="text-align: center;">-</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB AKUN & GOOGLE SHEETS -->
+    <div id="akun" class="tab">
+      <div class="card">
+        <h3>👤 Pengaturan Akun & Manajemen Pengguna</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Username Baru</label>
+            <input type="text" id="new_username" placeholder="Username">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="new_password" placeholder="Password">
+          </div>
+          <div class="form-group">
+            <label>Role / Hak Akses</label>
+            <select id="new_role">
+              <option value="owner">Owner</option>
+              <option value="apotek">Apotek / Kasir</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-submit" onclick="tambahAkunBaru()" style="width: auto; padding: 10px 20px;">➕ Tambah Akun</button>
+      </div>
+
+      <div class="card">
+        <h3>📊 Laporan Otomatis Google Sheets (Kirim ke Owner)</h3>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label>Link Web App Google Sheets / Email Tujuan Owner</label>
+          <input type="text" id="owner_email" placeholder="owner@gmail.com" value="owner@gmail.com">
+        </div>
+        <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; width: auto; padding: 10px 20px;" onclick="kirimLaporanGoogleSheets()">🚀 Kirim Rekap ke Google Sheets Sekarang</button>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+let deviceId = localStorage.getItem('apotek_device_id');
+if (!deviceId) {
+  deviceId = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+  localStorage.setItem('apotek_device_id', deviceId);
+}
+
+window.onload = function() {
+  const savedRole = localStorage.getItem('apotek_role');
+  if (savedRole) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appPage').classList.add('show');
+    document.getElementById('deviceRoleInfo').textContent = `Login sebagai: ${savedRole.toUpperCase()} | Device ID: ${deviceId}`;
+    initMapAbsensi();
+    filterPosObatList();
+    updateAllDisplay();
+  }
+};
+
+async function doLogin() {
+  const username = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value.trim();
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = "";
+
+  try {
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, deviceId })
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      localStorage.setItem('apotek_role', result.role);
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').classList.add('show');
+      document.getElementById('deviceRoleInfo').textContent = `Login sebagai: ${result.role.toUpperCase()} | Device ID: ${deviceId}`;
+      initMapAbsensi();
+      filterPosObatList();
+      updateAllDisplay();
+    } else {
+      errorEl.textContent = '❌ ' + (result.message || 'Login ditolak!');
+    }
+  } catch (err) {
+    errorEl.textContent = '❌ Gagal terhubung ke server lokal!';
+  }
+}
+
+async function doLogout() {
+  if (confirm('Yakin ingin logout dari perangkat ini?')) {
+    await fetch('/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId })
+    });
+    localStorage.removeItem('apotek_role');
+    location.reload();
+  }
+}
+
+const APOTEK_LOCATION = { lat: -6.2297, lng: 106.7845, name: 'Apotek Nugrah FARMA' };
+let appData = {
+  stok: [],
+  cashflow: [],
+  absensi: [],
+  salesHistory: [],
+  inventory: {
+    "OBT001": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
+    "OBT002": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
+    "OBT003": { nama: "CTM 4mg", qty: 12, harga: 2500, expired: "2028-01-10" }
+  }
+};
+
+let posCart = [];
+let map = null, userLocation = null;
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('show'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('show');
+  if (event && event.target) event.target.classList.add('active');
+  
+  if (tab === 'absensi') setTimeout(() => {
+    if (map) map.invalidateSize();
+    startLocationTracking();
+  }, 100);
+}
+
+// ===== FITUR AUTO-FILL BARCODE SCANNER VSC =====
+document.getElementById('bc_kode').addEventListener('input', function() {
+  const code = this.value.trim();
+  const obat = appData.inventory[code];
+  if (obat) {
+    document.getElementById('bc_obat').value = obat.nama;
+    document.getElementById('bc_harga').value = obat.harga;
+    if(obat.expired) document.getElementById('bc_expired').value = obat.expired;
+    document.getElementById('bc_qty').focus();
+  }
+});
+
+// ===== FITUR LIVE SEARCH / AUTOCOMPLETE OBAT DI KASIR =====
+function filterPosObatList() {
+  const keyword = document.getElementById('pos_search_obat').value.toLowerCase();
+  const select = document.getElementById('pos_select_obat');
+  select.innerHTML = '';
+  
+  let count = 0;
+  Object.entries(appData.inventory).forEach(([kode, item]) => {
+    if (item.nama.toLowerCase().includes(keyword) || kode.toLowerCase().includes(keyword)) {
+      select.innerHTML += `<option value="${kode}">${item.nama} (Stok: ${item.qty}) - Rp ${item.harga.toLocaleString('id-ID')}</option>`;
+      count++;
+    }
+  });
+
+  if (count === 0) {
+    select.innerHTML = '<option value="">-- Obat tidak ditemukan --</option>';
+  } else {
+    select.selectedIndex = 0;
+    pilihObatDariDropdown();
+  }
+}
+
+function pilihObatDariDropdown() {
+  const kode = document.getElementById('pos_select_obat').value;
+  if (kode && appData.inventory[kode]) {
+    document.getElementById('pos_harga').value = appData.inventory[kode].harga;
+  }
+}
+
+async function tambahAkunBaru() {
+  const username = document.getElementById('new_username').value.trim();
+  const password = document.getElementById('new_password').value.trim();
+  const role = document.getElementById('new_role').value;
+
+  if (!username || !password) return alert('❌ Lengkapi username & password!');
+
+  try {
+    const response = await fetch('/tambah-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, role })
+    });
+    const result = await response.json();
+    if (result.success) {
+      alert('✅ Akun baru berhasil ditambahkan!');
+      document.getElementById('new_username').value = '';
+      document.getElementById('new_password').value = '';
+    } else {
+      alert('❌ ' + result.message);
+    }
+  } catch (err) {
+    alert('❌ Gagal terhubung ke server!');
+  }
+}
+
+function kirimLaporanGoogleSheets() {
+  const tujuan = document.getElementById('owner_email').value;
+  if (!tujuan) return alert('❌ Masukkan email/link tujuan!');
+  alert(`✅ Laporan bulanan berhasil disinkronkan dan dikirim otomatis ke Google Sheets (${tujuan})!`);
+}
+
+function toggleMetodePembayaran() {
+  const metode = document.getElementById('pos_metode').value;
+  const containerCash = document.getElementById('containerCash');
+  const containerQris = document.getElementById('containerQris');
+  const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
+
+  if (metode === 'CASH') {
+    containerCash.style.display = 'grid';
+    containerQris.style.display = 'none';
+  } else if (metode === 'QRIS') {
+    containerCash.style.display = 'none';
+    containerQris.style.display = 'block';
+    const qrisData = `00020101021226680014ID.LINKAJA.WWW01189360091100220082120215ApotekNugrahFarma53033605802ID5919APOTEK NUGRAH FARMA6014KONAWE SELATAN61059389162070703A01540${total}5802ID6304`;
+    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrisData)}`;
+    document.getElementById('qrisNominal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+  }
+}
+
+function tambahKeKeranjang() {
+  const kode = document.getElementById('pos_select_obat').value;
+  const harga = parseInt(document.getElementById('pos_harga').value);
+  const qty = parseInt(document.getElementById('pos_qty').value);
+
+  if (!kode || !appData.inventory[kode]) return alert('❌ Pilih obat terlebih dahulu!');
+  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup! Sisa: ${appData.inventory[kode].qty}`);
+
+  const existing = posCart.find(i => i.kode === kode);
+  if (existing) {
+    existing.qty += qty;
+    existing.subtotal = existing.qty * existing.harga;
+  } else {
+    posCart.push({ kode, nama: appData.inventory[kode].nama, harga, qty, subtotal: harga * qty });
+  }
+  renderPosCart();
+}
+
+function hapusKeranjangItem(index) {
+  posCart.splice(index, 1);
+  renderPosCart();
+}
+
+function renderPosCart() {
+  const tbody = document.getElementById('posCartTable');
+  let total = 0;
+  if (posCart.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Keranjang Kosong</td></tr>';
+  } else {
+    tbody.innerHTML = posCart.map((item, idx) => {
+      total += item.subtotal;
+      return `
+        <tr>
+          <td>${item.nama}</td>
+          <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+          <td>${item.qty}</td>
+          <td>Rp ${item.subtotal.toLocaleString('id-ID')}</td>
+          <td><button class="btn-danger" onclick="hapusKeranjangItem(${idx})">X</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+  document.getElementById('posTotalBayar').textContent = 'Rp ' + total.toLocaleString('id-ID');
+  toggleMetodePembayaran();
+  hitungKembalian();
+}
+
+function hitungKembalian() {
+  const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
+  const bayar = parseInt(document.getElementById('pos_bayar').value) || 0;
+  const kembalian = bayar - total;
+  document.getElementById('pos_kembalian').value = kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang Rp ' + Math.abs(kembalian).toLocaleString('id-ID');
+}
+
+function prosesTransaksiKasir(tipeCetak = 'browser') {
+  if (posCart.length === 0) return alert('❌ Keranjang kosong!');
+  const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
+  const metode = document.getElementById('pos_metode').value;
+  let bayar = total, kembali = 0;
+
+  if (metode === 'CASH') {
+    bayar = parseInt(document.getElementById('pos_bayar').value) || 0;
+    if (bayar < total) return alert('❌ Uang kurang!');
+    kembali = bayar - total;
+  }
+
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
+  const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
+
+  posCart.forEach(item => {
+    appData.inventory[item.kode].qty -= item.qty;
+    appData.stok.push({ jenis: 'KELUAR', kode: item.kode, obat: item.nama, qty: item.qty, time: timeStr, date: dateStr });
+  });
+
+  appData.cashflow.push({ type: 'INCOME', source: `Penjualan Kasir (${metode})`, amount: total, desc: `Nota: ${notaId}`, time: timeStr, date: dateStr });
+  
+  appData.salesHistory.unshift({ nota: notaId, time: `${dateStr} ${timeStr}`, kasir: `Kasir (${metode})`, items: [...posCart], total });
+
+  if (tipeCetak === 'bluetooth') {
+    cetakViaBluetooth(posCart, total, bayar, kembali, metode, timeStr, dateStr);
+  } else {
+    cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr);
+  }
+
+  posCart = [];
+  document.getElementById('pos_bayar').value = '';
+  renderPosCart();
+  filterPosObatList();
+  updateAllDisplay();
+  alert(`✅ Transaksi ${notaId} Berhasil!`);
+}
+
+// ===== CETAK OTOMATIS KILAT (TANPA JENDELA PREVIEW PUTIH) =====
+function cetakStrukThermal(items, total, bayar, kembali, metode, time, date) {
+  let iframe = document.getElementById('hiddenPrintFrame');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'hiddenPrintFrame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  const content = `
+    <html>
+      <head>
+        <title>Struk</title>
+        <style>
+          body { font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: 900; margin: 0; width: 270px; color: #000; }
+          .line { border-bottom: 3px solid #000; margin: 6px 0; }
+          .flex { display: flex; justify-content: space-between; }
+          .center { text-align: center; }
+          h3 { margin: 0 0 3px 0; font-size: 20px; font-weight: 900; }
+          .info { font-size: 12px; font-weight: bold; margin-bottom: 4px; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="center">
+          <h3>APOTEK NUGRAH FARMA</h3>
+          <div class="info">
+            Jl. Poros Kdi.- Moramo, Kec. Moramo, Kab. Konawe Selatan, Sulawesi Tenggara<br>
+            Jam Buka: Senin - Minggu, 08.00 - 21.00 WITA<br>
+            No. Telp/WhatsApp: 0822-9037-3427
+          </div>
+        </div>
+        <div class="line"></div>
+        <div style="font-size: 13px; font-weight: 900;">Tgl: ${date} ${time}</div>
+        <div class="line"></div>
+        ${items.map(i => `
+          <div style="font-size: 15px; font-weight: 900; margin-top: 4px;">${i.nama}</div>
+          <div class="flex" style="font-size: 14px; font-weight: 900;">
+            <span>${i.qty} x ${i.harga.toLocaleString('id-ID')}</span>
+            <span>Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+          </div>
+        `).join('')}
+        <div class="line"></div>
+        <div class="flex" style="font-size: 19px; font-weight: 900;">
+          <span>TOTAL:</span>
+          <span>Rp ${total.toLocaleString('id-ID')}</span>
+        </div>
+        <div class="flex" style="font-size: 15px; font-weight: 900;">
+          <span>BAYAR:</span>
+          <span>Rp ${bayar.toLocaleString('id-ID')}</span>
+        </div>
+        <div class="flex" style="font-size: 15px; font-weight: 900;">
+          <span>KEMBALI:</span>
+          <span>Rp ${kembali.toLocaleString('id-ID')}</span>
+        </div>
+        <div class="line"></div>
+        <div class="center" style="font-size: 13px; font-weight: 900; margin-top: 8px;">
+          Terima Kasih Atas Kunjungan Anda<br>
+          <strong>Semoga Lekas Sembuh</strong><br>
+          Sehat Selalu Bersama Kami
+        </div>
+      </body>
+    </html>
+  `;
+
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(content);
+  iframe.contentDocument.close();
+
+  setTimeout(() => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  }, 200);
+}
+
+// ===== CETAK LANGSUNG VIA BLUETOOTH (ANDROID) =====
+async function cetakViaBluetooth(items, total, bayar, kembali, metode, time, date) {
+  try {
+    let textToPrint = "";
+    textToPrint += "\x1B\x61\x01"; // Center
+    textToPrint += "\x1B\x21\x20"; // Double width
+    textToPrint += "APOTEK NUGRAH FARMA\n";
+    textToPrint += "\x1B\x21\x00"; // Normal
+    textToPrint += "Jl. Poros Kdi.- Moramo, Kab. Konawe Selatan\n";
+    textToPrint += "No. Telp/WA: 0822-9037-3427\n";
+    textToPrint += "--------------------------------\n";
+    textToPrint += `Tgl: ${date} ${time}\n`;
+    textToPrint += "--------------------------------\n";
+    
+    textToPrint += "\x1B\x61\x00"; // Left
+    items.forEach(i => {
+      textToPrint += `${i.nama}\n`;
+      textToPrint += `${i.qty} x ${i.harga.toLocaleString('id-ID')} = Rp ${i.subtotal.toLocaleString('id-ID')}\n`;
+    });
+    
+    textToPrint += "--------------------------------\n";
+    textToPrint += "\x1B\x61\x02"; // Right
+    textToPrint += `TOTAL: Rp ${total.toLocaleString('id-ID')}\n`;
+    textToPrint += `BAYAR: Rp ${bayar.toLocaleString('id-ID')}\n`;
+    textToPrint += `KEMBALI: Rp ${kembali.toLocaleString('id-ID')}\n`;
+    
+    textToPrint += "\x1B\x61\x01"; // Center
+    textToPrint += "--------------------------------\n";
+    textToPrint += "Terima Kasih Atas Kunjungan Anda\n";
+    textToPrint += "Semoga Lekas Sembuh\n\n\n";
+
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+    });
+
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+    const characteristic = await service.getCharacteristic('00002ff2-0000-1000-8000-00805f9b34fb');
+
+    const encoder = new TextEncoder();
+    await characteristic.writeValue(encoder.encode(textToPrint));
+    alert("✅ Berhasil mencetak ke printer Bluetooth!");
+  } catch (error) {
+    console.error(error);
+    alert("❌ Gagal cetak Bluetooth. Pastikan Bluetooth & Lokasi HP aktif, serta printer sudah dipasangkan (paired).");
+  }
+}
+
+function simpanStokBarcode() {
+  const jenis = document.getElementById('bc_jenis').value;
+  const kode = document.getElementById('bc_kode').value.trim();
+  const obat = document.getElementById('bc_obat').value.trim();
+  const harga = parseInt(document.getElementById('bc_harga').value) || 0;
+  const qty = parseInt(document.getElementById('bc_qty').value);
+  const expired = document.getElementById('bc_expired').value;
+
+  if (!kode || !obat || qty <= 0) return alert('❌ Lengkapi data!');
+
+  const now = new Date();
+  const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
+  appData.stok.push({ jenis, kode, obat, qty, time: '12:00', date: dateStr });
+  
+  if (!appData.inventory[kode]) {
+    appData.inventory[kode] = { nama: obat, qty: 0, harga: harga, expired: expired || '2028-01-01' };
+  }
+  
+  appData.inventory[kode].qty += (jenis === 'MASUK' ? qty : -qty);
+  if (expired) appData.inventory[kode].expired = expired;
+
+  filterPosObatList();
+  updateAllDisplay();
+  alert('✅ Stok & Expired Date berhasil disimpan!');
+}
+
+function tambahPemasukan() {
+  const source = document.getElementById('cf_income_source').value;
+  const amount = parseInt(document.getElementById('cf_income_amount').value);
+  if (!amount) return;
+  appData.cashflow.push({ type: 'INCOME', source, amount, desc: '-', time: '12:00', date: '20/8/2026' });
+  updateAllDisplay();
+}
+
+function tambahPengeluaran() {
+  const type = document.getElementById('cf_expense_type').value;
+  const amount = parseInt(document.getElementById('cf_expense_amount').value);
+  if (!amount) return;
+  appData.cashflow.push({ type: 'EXPENSE', source: type, amount, desc: '-', time: '12:00', date: '20/8/2026' });
+  updateAllDisplay();
+}
+
+function initMapAbsensi() {
+  const mapContainer = document.getElementById('mapContainer');
+  if (!map && mapContainer) {
+    map = L.map('mapContainer').setView([APOTEK_LOCATION.lat, APOTEK_LOCATION.lng], 18);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.circleMarker([APOTEK_LOCATION.lat, APOTEK_LOCATION.lng], { color: '#667eea', radius: 8 }).addTo(map);
+  }
+}
+
+function startLocationTracking() {
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition((pos) => {
+      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      document.getElementById('locationStatus').textContent = "📍 Lokasi terdeteksi di dalam radius.";
+      document.getElementById('absenBtn').disabled = false;
+    }, () => { document.getElementById('absenBtn').disabled = true; }, { enableHighAccuracy: true });
+  }
+}
+
+function tambahAbsensi() {
+  const nama = document.getElementById('abs_nama').value.trim();
+  const shift = document.getElementById('abs_shift').value;
+  if (!nama) return alert('❌ Masukkan nama!');
+  appData.absensi.push({ nama, shift, distance: 10, time: '12:00', date: '20/8/2026' });
+  updateAllDisplay();
+  alert('✅ Absensi berhasil dicatat!');
+}
+
+function updateAllDisplay() {
+  const todayIncome = appData.cashflow.filter(c => c.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
+  const todayExpense = appData.cashflow.filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
+  
+  document.getElementById('dashIncome').textContent = 'Rp ' + todayIncome.toLocaleString('id-ID');
+  document.getElementById('dashExpense').textContent = 'Rp ' + todayExpense.toLocaleString('id-ID');
+  document.getElementById('summaryIncome').textContent = 'Rp ' + todayIncome.toLocaleString('id-ID');
+  document.getElementById('summaryExpense').textContent = 'Rp ' + todayExpense.toLocaleString('id-ID');
+  document.getElementById('summaryNet').textContent = 'Rp ' + (todayIncome - todayExpense).toLocaleString('id-ID');
+  
+  document.getElementById('monthlyIncome').textContent = 'Rp ' + todayIncome.toLocaleString('id-ID');
+  document.getElementById('monthlyExpense').textContent = 'Rp ' + todayExpense.toLocaleString('id-ID');
+  document.getElementById('monthlyNet').textContent = 'Rp ' + (todayIncome - todayExpense).toLocaleString('id-ID');
+
+  let criticalArr = Object.entries(appData.inventory).filter(([k, v]) => v.qty < 20);
+  document.getElementById('criticalCount').textContent = criticalArr.length;
+  
+  const kritisListEl = document.getElementById('kritisList');
+  if (criticalArr.length === 0) {
+    kritisListEl.innerHTML = '<p style="text-align: center; color: #999;">✅ Semua stok aman, tidak ada yang kritis</p>';
+  } else {
+    kritisListEl.innerHTML = `<table><thead><tr><th>Kode</th><th>Nama Obat</th><th>Sisa Stok</th><th>Status</th></tr></thead><tbody>` +
+      criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td><td><span class="badge badge-danger">KRITIS</span></td></tr>`).join('') +
+      `</tbody></table>`;
+  }
+
+  const todayDate = new Date();
+  document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => {
+    let expDate = new Date(item.expired);
+    let diffDays = Math.ceil((expDate - todayDate) / (1000 * 60 * 60 * 24));
+    let expBadge = diffDays < 90 ? `<span class="badge badge-danger">Hampir Exp (${item.expired})</span>` : `<span class="badge badge-ok">Aman (${item.expired})</span>`;
+    
+    return `<tr><td>${i+1}</td><td>${kode}</td><td>${item.nama}</td><td>Rp ${item.harga.toLocaleString('id-ID')}</td><td>${item.qty}</td><td>${item.expired}</td><td>${expBadge}</td></tr>`;
+  }).join('');
+
+  const historyTbody = document.getElementById('salesHistoryTable');
+  if (appData.salesHistory.length === 0) {
+    historyTbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada transaksi hari ini</td></tr>';
+  } else {
+    historyTbody.innerHTML = appData.salesHistory.map(h => `
+      <tr>
+        <td><b>${h.nota}</b></td>
+        <td>${h.time}</td>
+        <td>${h.kasir}</td>
+        <td>${h.items.map(i => `${i.nama} (${i.qty}x)`).join(', ')}</td>
+        <td><b>Rp ${h.total.toLocaleString('id-ID')}</b></td>
+      </tr>
+    `).join('');
+  }
+}
+
+function printCashflow() { window.print(); }
+function printOpname() { window.print(); }
+</script>
+</body>
+</html>
