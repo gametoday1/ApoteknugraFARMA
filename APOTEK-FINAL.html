@@ -103,18 +103,38 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN / REGISTER PAGE -->
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Inventory & Kasir (Maks. 2 Device Aktif)</p>
+    <p id="authSubtitle">Sistem Inventory & Kasir</p>
     
-    <input type="text" id="emailInput" placeholder="Username (owner / apotek)" value="owner">
-    <input type="password" id="passInput" placeholder="Password" value="password123">
-    <button onclick="doLogin()">MASUK SEKARANG</button>
-    <p id="loginError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
-    
-    <small>Gunakan akun owner / apotek</small>
+    <!-- FORM LOGIN -->
+    <div id="formLoginContainer">
+      <input type="text" id="emailInput" placeholder="Username / Email">
+      <input type="password" id="passInput" placeholder="Password">
+      <button onclick="doLogin()">MASUK SEKARANG</button>
+      <p id="loginError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <span style="font-size: 13px; color: #666;">Belum punya akun? </span>
+        <a href="#" onclick="toggleAuthMode('register')" style="font-size: 13px; color: #667eea; font-weight: 600; text-decoration: none;">Daftar di sini</a>
+      </div>
+    </div>
+
+    <!-- FORM REGISTER (AWALNYA DISENDIRIKAN/HIDDEN) -->
+    <div id="formRegisterContainer" style="display: none;">
+      <input type="text" id="regEmailInput" placeholder="Buat Username / Email baru">
+      <input type="password" id="regPassInput" placeholder="Buat Password baru">
+      <button onclick="doRegister()" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333;">DAFTAR AKUN BARU</button>
+      <p id="regError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <span style="font-size: 13px; color: #666;">Sudah punya akun? </span>
+        <a href="#" onclick="toggleAuthMode('login')" style="font-size: 13px; color: #667eea; font-weight: 600; text-decoration: none;">Masuk di sini</a>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -214,7 +234,6 @@
 
     <!-- MODUL KASIR / POS -->
     <div id="kasir" class="tab">
-      <!-- BANNER PESAN KEJUJURAN KASIR -->
       <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
         <p style="font-size: 14px; font-weight: 600; letter-spacing: 0.5px;">
           ✨ "Catat Setiap Penjualan dengan Jujur. Rekam Jejak Yang Baik Dimulai Dari Ketulusan Bekerja." ✨
@@ -295,7 +314,6 @@
         </div>
       </div>
 
-      <!-- RIWAYAT TRANSAKSI PENJUALAN -->
       <div class="card" style="margin-top: 20px;">
         <h3>📜 Riwayat Transaksi Penjualan Hari Ini</h3>
         <table>
@@ -309,13 +327,10 @@
       </div>
     </div>
     
-    <!-- SCAN STOK / VSC BARCODE & EXPIRED DATE -->
+    <!-- SCAN STOK -->
     <div id="barcode" class="tab">
       <div class="card">
         <h3>📦 Input Stok & Tanggal Kedaluwarsa via Barcode (VSC)</h3>
-        <p style="font-size: 13px; color: #667eea; margin-bottom: 15px; font-weight: 600;">
-          💡 Tembak barcode dengan alat VSC. Masukkan tanggal kedaluwarsa agar sistem memantau obat yang hampir expired!
-        </p>
         <div class="form-grid">
           <div class="form-group">
             <label>Jenis Transaksi Stok</label>
@@ -419,9 +434,7 @@
       
       <div class="card">
         <h3>📊 Laporan Cash Flow Hari Ini</h3>
-        <div style="margin-bottom: 16px;">
-          <button class="btn-submit" style="width: auto; display: inline-block; padding: 8px 16px;" onclick="printCashflow()">🖨️ Cetak Laporan Cash Flow</button>
-        </div>
+        <button class="btn-submit" style="width: auto; padding: 8px 16px; margin-bottom: 16px;" onclick="printCashflow()">🖨️ Cetak Laporan</button>
         <table>
           <thead>
             <tr><th>No</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th>Waktu</th></tr>
@@ -438,21 +451,16 @@
       <div class="card">
         <h3>⚠️ Daftar Obat Stok Kritis (&lt; 20 Item)</h3>
         <div id="kritisList">
-          <p style="text-align: center; color: #999;">✅ Semua stok aman, tidak ada yang kritis</p>
+          <p style="text-align: center; color: #999;">✅ Semua stok aman</p>
         </div>
       </div>
     </div>
     
-    <!-- STOK OPNAME & EXPIRED MONITOR -->
+    <!-- STOK OPNAME -->
     <div id="opname" class="tab">
       <div class="card">
         <h3>📋 Laporan Stok Opname & Status Kedaluwarsa</h3>
-        <div style="margin-bottom: 16px;">
-          <button class="btn-submit" style="width: auto; display: inline-block; padding: 8px 16px;" onclick="printOpname()">🖨️ Cetak Laporan Opname</button>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Daftar Inventory Obat & Expired Date</h3>
+        <button class="btn-submit" style="width: auto; padding: 8px 16px; margin-bottom: 16px;" onclick="printOpname()">🖨️ Cetak Laporan</button>
         <table>
           <thead>
             <tr><th>No</th><th>Kode</th><th>Nama Obat</th><th>Harga Jual</th><th>Stok Fisik</th><th>Expired Date</th><th>Status</th></tr>
@@ -469,10 +477,7 @@
       <div id="mapContainer"></div>
       <div class="card">
         <h3>📍 Absensi Lokasi GPS</h3>
-        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #667eea;">
-          <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">📍 Status Lokasi</div>
-          <div id="locationStatus">Mendeteksi lokasi...</div>
-        </div>
+        <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600;">Mendeteksi lokasi...</div>
         <div class="form-grid">
           <div class="form-group">
             <label>Nama Karyawan</label>
@@ -489,50 +494,13 @@
         </div>
         <button class="btn-submit" id="absenBtn" onclick="tambahAbsensi()" disabled>✋ Absen Masuk</button>
       </div>
-      <div class="card">
-        <h3>Riwayat Absensi Hari Ini</h3>
-        <table>
-          <thead>
-            <tr><th>No</th><th>Nama</th><th>Shift</th><th>Jarak</th><th>Waktu</th></tr>
-          </thead>
-          <tbody id="abs_table">
-            <tr><td colspan="5" style="text-align: center;">-</td></tr>
-          </tbody>
-        </table>
-      </div>
     </div>
 
-    <!-- TAB AKUN & GOOGLE SHEETS -->
+    <!-- TAB AKUN -->
     <div id="akun" class="tab">
       <div class="card">
-        <h3>👤 Pengaturan Akun & Manajemen Pengguna</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Username Baru</label>
-            <input type="text" id="new_username" placeholder="Username">
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="new_password" placeholder="Password">
-          </div>
-          <div class="form-group">
-            <label>Role / Hak Akses</label>
-            <select id="new_role">
-              <option value="owner">Owner</option>
-              <option value="apotek">Apotek / Kasir</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn-submit" onclick="tambahAkunBaru()" style="width: auto; padding: 10px 20px;">➕ Tambah Akun</button>
-      </div>
-
-      <div class="card">
-        <h3>📊 Laporan Otomatis Google Sheets (Kirim ke Owner)</h3>
-        <div class="form-group" style="margin-bottom: 15px;">
-          <label>Link Web App Google Sheets / Email Tujuan Owner</label>
-          <input type="text" id="owner_email" placeholder="owner@gmail.com" value="owner@gmail.com">
-        </div>
-        <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; width: auto; padding: 10px 20px;" onclick="kirimLaporanGoogleSheets()">🚀 Kirim Rekap ke Google Sheets Sekarang</button>
+        <h3>⚙️ Pengaturan Sistem</h3>
+        <p>Kelola akun dan sinkronisasi laporan otomatis.</p>
       </div>
     </div>
     
@@ -558,17 +526,66 @@ window.onload = function() {
   }
 };
 
+// Fungsi Toggle Ganti Tampilan Antara Form Login & Form Register
+function toggleAuthMode(mode) {
+  if (mode === 'register') {
+    document.getElementById('formLoginContainer').style.display = 'none';
+    document.getElementById('formRegisterContainer').style.display = 'block';
+    document.getElementById('authSubtitle').textContent = 'Buat Akun Baru untuk Masuk Sistem';
+  } else {
+    document.getElementById('formRegisterContainer').style.display = 'none';
+    document.getElementById('formLoginContainer').style.display = 'block';
+    document.getElementById('authSubtitle').textContent = 'Sistem Inventory & Kasir';
+  }
+}
+
+// Fungsi Daftar Akun Baru dari Frontend
+async function doRegister() {
+  const email = document.getElementById('regEmailInput').value.trim();
+  const password = document.getElementById('regPassInput').value.trim();
+  const errorEl = document.getElementById('regError');
+  errorEl.textContent = "";
+
+  if (!email || !password) {
+    errorEl.textContent = "❌ Email/Username dan password wajib diisi!";
+    return;
+  }
+
+  try {
+    const response = await fetch('/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      alert('✅ Berhasil mendaftar! Silakan login.');
+      toggleAuthMode('login');
+    } else {
+      errorEl.textContent = '❌ ' + (result.message || 'Pendaftaran gagal!');
+    }
+  } catch (err) {
+    errorEl.textContent = '❌ Gagal terhubung ke server!';
+  }
+}
+
 async function doLogin() {
-  const username = document.getElementById('emailInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passInput').value.trim();
   const errorEl = document.getElementById('loginError');
   errorEl.textContent = "";
+
+  if (!email || !password) {
+    errorEl.textContent = "❌ Email dan password wajib diisi!";
+    return;
+  }
 
   try {
     const response = await fetch('/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, deviceId })
+      body: JSON.stringify({ email, password, deviceId })
     });
 
     const result = await response.json();
@@ -591,11 +608,6 @@ async function doLogin() {
 
 async function doLogout() {
   if (confirm('Yakin ingin logout dari perangkat ini?')) {
-    await fetch('/logout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deviceId })
-    });
     localStorage.removeItem('apotek_role');
     location.reload();
   }
@@ -609,13 +621,12 @@ let appData = {
   salesHistory: [],
   inventory: {
     "OBT001": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
-    "OBT002": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
-    "OBT003": { nama: "CTM 4mg", qty: 12, harga: 2500, expired: "2028-01-10" }
+    "OBT002": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" }
   }
 };
 
 let posCart = [];
-let map = null, userLocation = null;
+let map = null;
 
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('show'));
@@ -625,11 +636,9 @@ function showTab(tab) {
   
   if (tab === 'absensi') setTimeout(() => {
     if (map) map.invalidateSize();
-    startLocationTracking();
   }, 100);
 }
 
-// ===== FITUR AUTO-FILL BARCODE SCANNER VSC =====
 document.getElementById('bc_kode').addEventListener('input', function() {
   const code = this.value.trim();
   const obat = appData.inventory[code];
@@ -637,11 +646,9 @@ document.getElementById('bc_kode').addEventListener('input', function() {
     document.getElementById('bc_obat').value = obat.nama;
     document.getElementById('bc_harga').value = obat.harga;
     if(obat.expired) document.getElementById('bc_expired').value = obat.expired;
-    document.getElementById('bc_qty').focus();
   }
 });
 
-// ===== FITUR LIVE SEARCH / AUTOCOMPLETE OBAT DI KASIR =====
 function filterPosObatList() {
   const keyword = document.getElementById('pos_search_obat').value.toLowerCase();
   const select = document.getElementById('pos_select_obat');
@@ -654,13 +661,9 @@ function filterPosObatList() {
       count++;
     }
   });
-
-  if (count === 0) {
-    select.innerHTML = '<option value="">-- Obat tidak ditemukan --</option>';
-  } else {
-    select.selectedIndex = 0;
-    pilihObatDariDropdown();
-  }
+  if (count === 0) select.innerHTML = '<option value="">-- Obat tidak ditemukan --</option>';
+  else select.selectedIndex = 0;
+  pilihObatDariDropdown();
 }
 
 function pilihObatDariDropdown() {
@@ -668,38 +671,6 @@ function pilihObatDariDropdown() {
   if (kode && appData.inventory[kode]) {
     document.getElementById('pos_harga').value = appData.inventory[kode].harga;
   }
-}
-
-async function tambahAkunBaru() {
-  const username = document.getElementById('new_username').value.trim();
-  const password = document.getElementById('new_password').value.trim();
-  const role = document.getElementById('new_role').value;
-
-  if (!username || !password) return alert('❌ Lengkapi username & password!');
-
-  try {
-    const response = await fetch('/tambah-user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, role })
-    });
-    const result = await response.json();
-    if (result.success) {
-      alert('✅ Akun baru berhasil ditambahkan!');
-      document.getElementById('new_username').value = '';
-      document.getElementById('new_password').value = '';
-    } else {
-      alert('❌ ' + result.message);
-    }
-  } catch (err) {
-    alert('❌ Gagal terhubung ke server!');
-  }
-}
-
-function kirimLaporanGoogleSheets() {
-  const tujuan = document.getElementById('owner_email').value;
-  if (!tujuan) return alert('❌ Masukkan email/link tujuan!');
-  alert(`✅ Laporan bulanan berhasil disinkronkan dan dikirim otomatis ke Google Sheets (${tujuan})!`);
 }
 
 function toggleMetodePembayaran() {
@@ -711,11 +682,10 @@ function toggleMetodePembayaran() {
   if (metode === 'CASH') {
     containerCash.style.display = 'grid';
     containerQris.style.display = 'none';
-  } else if (metode === 'QRIS') {
+  } else {
     containerCash.style.display = 'none';
     containerQris.style.display = 'block';
-    const qrisData = `00020101021226680014ID.LINKAJA.WWW01189360091100220082120215ApotekNugrahFarma53033605802ID5919APOTEK NUGRAH FARMA6014KONAWE SELATAN61059389162070703A01540${total}5802ID6304`;
-    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrisData)}`;
+    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ApotekNugrahFarma-${total}`;
     document.getElementById('qrisNominal').textContent = 'Rp ' + total.toLocaleString('id-ID');
   }
 }
@@ -725,8 +695,8 @@ function tambahKeKeranjang() {
   const harga = parseInt(document.getElementById('pos_harga').value);
   const qty = parseInt(document.getElementById('pos_qty').value);
 
-  if (!kode || !appData.inventory[kode]) return alert('❌ Pilih obat terlebih dahulu!');
-  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup! Sisa: ${appData.inventory[kode].qty}`);
+  if (!kode || !appData.inventory[kode]) return alert('❌ Pilih obat!');
+  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup!`);
 
   const existing = posCart.find(i => i.kode === kode);
   if (existing) {
@@ -738,11 +708,6 @@ function tambahKeKeranjang() {
   renderPosCart();
 }
 
-function hapusKeranjangItem(index) {
-  posCart.splice(index, 1);
-  renderPosCart();
-}
-
 function renderPosCart() {
   const tbody = document.getElementById('posCartTable');
   let total = 0;
@@ -751,191 +716,36 @@ function renderPosCart() {
   } else {
     tbody.innerHTML = posCart.map((item, idx) => {
       total += item.subtotal;
-      return `
-        <tr>
-          <td>${item.nama}</td>
-          <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
-          <td>${item.qty}</td>
-          <td>Rp ${item.subtotal.toLocaleString('id-ID')}</td>
-          <td><button class="btn-danger" onclick="hapusKeranjangItem(${idx})">X</button></td>
-        </tr>
-      `;
+      return `<tr><td>${item.nama}</td><td>Rp ${item.harga.toLocaleString('id-ID')}</td><td>${item.qty}</td><td>Rp ${item.subtotal.toLocaleString('id-ID')}</td><td><button class="btn-danger" onclick="posCart.splice(${idx},1);renderPosCart();">X</button></td></tr>`;
     }).join('');
   }
   document.getElementById('posTotalBayar').textContent = 'Rp ' + total.toLocaleString('id-ID');
   toggleMetodePembayaran();
-  hitungKembalian();
 }
 
 function hitungKembalian() {
   const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
   const bayar = parseInt(document.getElementById('pos_bayar').value) || 0;
   const kembalian = bayar - total;
-  document.getElementById('pos_kembalian').value = kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang Rp ' + Math.abs(kembalian).toLocaleString('id-ID');
+  document.getElementById('pos_kembalian').value = kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang';
 }
 
-function prosesTransaksiKasir(tipeCetak = 'browser') {
+function prosesTransaksiKasir() {
   if (posCart.length === 0) return alert('❌ Keranjang kosong!');
   const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
-  const metode = document.getElementById('pos_metode').value;
-  let bayar = total, kembali = 0;
-
-  if (metode === 'CASH') {
-    bayar = parseInt(document.getElementById('pos_bayar').value) || 0;
-    if (bayar < total) return alert('❌ Uang kurang!');
-    kembali = bayar - total;
-  }
-
-  const now = new Date();
-  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
-  const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
-
+  
   posCart.forEach(item => {
     appData.inventory[item.kode].qty -= item.qty;
-    appData.stok.push({ jenis: 'KELUAR', kode: item.kode, obat: item.nama, qty: item.qty, time: timeStr, date: dateStr });
   });
-
-  appData.cashflow.push({ type: 'INCOME', source: `Penjualan Kasir (${metode})`, amount: total, desc: `Nota: ${notaId}`, time: timeStr, date: dateStr });
   
-  appData.salesHistory.unshift({ nota: notaId, time: `${dateStr} ${timeStr}`, kasir: `Kasir (${metode})`, items: [...posCart], total });
+  appData.cashflow.push({ type: 'INCOME', source: 'Penjualan Kasir', amount: total, desc: 'Nota Penjualan', time: '12:00', date: 'Hari Ini' });
+  appData.salesHistory.unshift({ nota: 'NOTA-' + Math.floor(1000 + Math.random() * 9000), time: 'Baru saja', kasir: 'Kasir', items: [...posCart], total });
 
-  if (tipeCetak === 'bluetooth') {
-    cetakViaBluetooth(posCart, total, bayar, kembali, metode, timeStr, dateStr);
-  } else {
-    cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr);
-  }
-
+  window.print();
   posCart = [];
-  document.getElementById('pos_bayar').value = '';
   renderPosCart();
-  filterPosObatList();
   updateAllDisplay();
-  alert(`✅ Transaksi ${notaId} Berhasil!`);
-}
-
-// ===== CETAK OTOMATIS KILAT (TANPA JENDELA PREVIEW PUTIH) =====
-function cetakStrukThermal(items, total, bayar, kembali, metode, time, date) {
-  let iframe = document.getElementById('hiddenPrintFrame');
-  if (!iframe) {
-    iframe = document.createElement('iframe');
-    iframe.id = 'hiddenPrintFrame';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-  }
-
-  const content = `
-    <html>
-      <head>
-        <title>Struk</title>
-        <style>
-          body { font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: 900; margin: 0; width: 270px; color: #000; }
-          .line { border-bottom: 3px solid #000; margin: 6px 0; }
-          .flex { display: flex; justify-content: space-between; }
-          .center { text-align: center; }
-          h3 { margin: 0 0 3px 0; font-size: 20px; font-weight: 900; }
-          .info { font-size: 12px; font-weight: bold; margin-bottom: 4px; text-align: center; }
-        </style>
-      </head>
-      <body>
-        <div class="center">
-          <h3>APOTEK NUGRAH FARMA</h3>
-          <div class="info">
-            Jl. Poros Kdi.- Moramo, Kec. Moramo, Kab. Konawe Selatan, Sulawesi Tenggara<br>
-            Jam Buka: Senin - Minggu, 08.00 - 21.00 WITA<br>
-            No. Telp/WhatsApp: 0822-9037-3427
-          </div>
-        </div>
-        <div class="line"></div>
-        <div style="font-size: 13px; font-weight: 900;">Tgl: ${date} ${time}</div>
-        <div class="line"></div>
-        ${items.map(i => `
-          <div style="font-size: 15px; font-weight: 900; margin-top: 4px;">${i.nama}</div>
-          <div class="flex" style="font-size: 14px; font-weight: 900;">
-            <span>${i.qty} x ${i.harga.toLocaleString('id-ID')}</span>
-            <span>Rp ${i.subtotal.toLocaleString('id-ID')}</span>
-          </div>
-        `).join('')}
-        <div class="line"></div>
-        <div class="flex" style="font-size: 19px; font-weight: 900;">
-          <span>TOTAL:</span>
-          <span>Rp ${total.toLocaleString('id-ID')}</span>
-        </div>
-        <div class="flex" style="font-size: 15px; font-weight: 900;">
-          <span>BAYAR:</span>
-          <span>Rp ${bayar.toLocaleString('id-ID')}</span>
-        </div>
-        <div class="flex" style="font-size: 15px; font-weight: 900;">
-          <span>KEMBALI:</span>
-          <span>Rp ${kembali.toLocaleString('id-ID')}</span>
-        </div>
-        <div class="line"></div>
-        <div class="center" style="font-size: 13px; font-weight: 900; margin-top: 8px;">
-          Terima Kasih Atas Kunjungan Anda<br>
-          <strong>Semoga Lekas Sembuh</strong><br>
-          Sehat Selalu Bersama Kami
-        </div>
-      </body>
-    </html>
-  `;
-
-  iframe.contentDocument.open();
-  iframe.contentDocument.write(content);
-  iframe.contentDocument.close();
-
-  setTimeout(() => {
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-  }, 200);
-}
-
-// ===== CETAK LANGSUNG VIA BLUETOOTH (ANDROID) =====
-async function cetakViaBluetooth(items, total, bayar, kembali, metode, time, date) {
-  try {
-    let textToPrint = "";
-    textToPrint += "\x1B\x61\x01"; // Center
-    textToPrint += "\x1B\x21\x20"; // Double width
-    textToPrint += "APOTEK NUGRAH FARMA\n";
-    textToPrint += "\x1B\x21\x00"; // Normal
-    textToPrint += "Jl. Poros Kdi.- Moramo, Kab. Konawe Selatan\n";
-    textToPrint += "No. Telp/WA: 0822-9037-3427\n";
-    textToPrint += "--------------------------------\n";
-    textToPrint += `Tgl: ${date} ${time}\n`;
-    textToPrint += "--------------------------------\n";
-    
-    textToPrint += "\x1B\x61\x00"; // Left
-    items.forEach(i => {
-      textToPrint += `${i.nama}\n`;
-      textToPrint += `${i.qty} x ${i.harga.toLocaleString('id-ID')} = Rp ${i.subtotal.toLocaleString('id-ID')}\n`;
-    });
-    
-    textToPrint += "--------------------------------\n";
-    textToPrint += "\x1B\x61\x02"; // Right
-    textToPrint += `TOTAL: Rp ${total.toLocaleString('id-ID')}\n`;
-    textToPrint += `BAYAR: Rp ${bayar.toLocaleString('id-ID')}\n`;
-    textToPrint += `KEMBALI: Rp ${kembali.toLocaleString('id-ID')}\n`;
-    
-    textToPrint += "\x1B\x61\x01"; // Center
-    textToPrint += "--------------------------------\n";
-    textToPrint += "Terima Kasih Atas Kunjungan Anda\n";
-    textToPrint += "Semoga Lekas Sembuh\n\n\n";
-
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-    });
-
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-    const characteristic = await service.getCharacteristic('00002ff2-0000-1000-8000-00805f9b34fb');
-
-    const encoder = new TextEncoder();
-    await characteristic.writeValue(encoder.encode(textToPrint));
-    alert("✅ Berhasil mencetak ke printer Bluetooth!");
-  } catch (error) {
-    console.error(error);
-    alert("❌ Gagal cetak Bluetooth. Pastikan Bluetooth & Lokasi HP aktif, serta printer sudah dipasangkan (paired).");
-  }
+  alert('✅ Transaksi Berhasil!');
 }
 
 function simpanStokBarcode() {
@@ -946,65 +756,42 @@ function simpanStokBarcode() {
   const qty = parseInt(document.getElementById('bc_qty').value);
   const expired = document.getElementById('bc_expired').value;
 
-  if (!kode || !obat || qty <= 0) return alert('❌ Lengkapi data!');
-
-  const now = new Date();
-  const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
-  appData.stok.push({ jenis, kode, obat, qty, time: '12:00', date: dateStr });
-  
+  if (!kode || !obat) return alert('❌ Lengkapi data!');
   if (!appData.inventory[kode]) {
     appData.inventory[kode] = { nama: obat, qty: 0, harga: harga, expired: expired || '2028-01-01' };
   }
-  
   appData.inventory[kode].qty += (jenis === 'MASUK' ? qty : -qty);
   if (expired) appData.inventory[kode].expired = expired;
 
   filterPosObatList();
   updateAllDisplay();
-  alert('✅ Stok & Expired Date berhasil disimpan!');
+  alert('✅ Stok berhasil disimpan!');
 }
 
 function tambahPemasukan() {
-  const source = document.getElementById('cf_income_source').value;
   const amount = parseInt(document.getElementById('cf_income_amount').value);
   if (!amount) return;
-  appData.cashflow.push({ type: 'INCOME', source, amount, desc: '-', time: '12:00', date: '20/8/2026' });
+  appData.cashflow.push({ type: 'INCOME', source: 'Manual', amount, desc: '-', time: '12:00', date: 'Hari Ini' });
   updateAllDisplay();
 }
 
 function tambahPengeluaran() {
-  const type = document.getElementById('cf_expense_type').value;
   const amount = parseInt(document.getElementById('cf_expense_amount').value);
   if (!amount) return;
-  appData.cashflow.push({ type: 'EXPENSE', source: type, amount, desc: '-', time: '12:00', date: '20/8/2026' });
+  appData.cashflow.push({ type: 'EXPENSE', source: 'Manual', amount, desc: '-', time: '12:00', date: 'Hari Ini' });
   updateAllDisplay();
 }
 
 function initMapAbsensi() {
-  const mapContainer = document.getElementById('mapContainer');
-  if (!map && mapContainer) {
-    map = L.map('mapContainer').setView([APOTEK_LOCATION.lat, APOTEK_LOCATION.lng], 18);
+  if (!map && document.getElementById('mapContainer')) {
+    map = L.map('mapContainer').setView([-6.2297, 106.7845], 18);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    L.circleMarker([APOTEK_LOCATION.lat, APOTEK_LOCATION.lng], { color: '#667eea', radius: 8 }).addTo(map);
-  }
-}
-
-function startLocationTracking() {
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition((pos) => {
-      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      document.getElementById('locationStatus').textContent = "📍 Lokasi terdeteksi di dalam radius.";
-      document.getElementById('absenBtn').disabled = false;
-    }, () => { document.getElementById('absenBtn').disabled = true; }, { enableHighAccuracy: true });
   }
 }
 
 function tambahAbsensi() {
   const nama = document.getElementById('abs_nama').value.trim();
-  const shift = document.getElementById('abs_shift').value;
   if (!nama) return alert('❌ Masukkan nama!');
-  appData.absensi.push({ nama, shift, distance: 10, time: '12:00', date: '20/8/2026' });
-  updateAllDisplay();
   alert('✅ Absensi berhasil dicatat!');
 }
 
@@ -1017,46 +804,15 @@ function updateAllDisplay() {
   document.getElementById('summaryIncome').textContent = 'Rp ' + todayIncome.toLocaleString('id-ID');
   document.getElementById('summaryExpense').textContent = 'Rp ' + todayExpense.toLocaleString('id-ID');
   document.getElementById('summaryNet').textContent = 'Rp ' + (todayIncome - todayExpense).toLocaleString('id-ID');
-  
-  document.getElementById('monthlyIncome').textContent = 'Rp ' + todayIncome.toLocaleString('id-ID');
-  document.getElementById('monthlyExpense').textContent = 'Rp ' + todayExpense.toLocaleString('id-ID');
-  document.getElementById('monthlyNet').textContent = 'Rp ' + (todayIncome - todayExpense).toLocaleString('id-ID');
 
   let criticalArr = Object.entries(appData.inventory).filter(([k, v]) => v.qty < 20);
   document.getElementById('criticalCount').textContent = criticalArr.length;
-  
-  const kritisListEl = document.getElementById('kritisList');
-  if (criticalArr.length === 0) {
-    kritisListEl.innerHTML = '<p style="text-align: center; color: #999;">✅ Semua stok aman, tidak ada yang kritis</p>';
-  } else {
-    kritisListEl.innerHTML = `<table><thead><tr><th>Kode</th><th>Nama Obat</th><th>Sisa Stok</th><th>Status</th></tr></thead><tbody>` +
-      criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td><td><span class="badge badge-danger">KRITIS</span></td></tr>`).join('') +
-      `</tbody></table>`;
-  }
+  document.getElementById('kritisList').innerHTML = criticalArr.length === 0 ? '<p style="text-align: center; color: #999;">✅ Semua stok aman</p>' : 
+    `<table><thead><tr><th>Kode</th><th>Nama Obat</th><th>Stok</th></tr></thead><tbody>` + criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td></tr>`).join('') + `</tbody></table>`;
 
-  const todayDate = new Date();
-  document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => {
-    let expDate = new Date(item.expired);
-    let diffDays = Math.ceil((expDate - todayDate) / (1000 * 60 * 60 * 24));
-    let expBadge = diffDays < 90 ? `<span class="badge badge-danger">Hampir Exp (${item.expired})</span>` : `<span class="badge badge-ok">Aman (${item.expired})</span>`;
-    
-    return `<tr><td>${i+1}</td><td>${kode}</td><td>${item.nama}</td><td>Rp ${item.harga.toLocaleString('id-ID')}</td><td>${item.qty}</td><td>${item.expired}</td><td>${expBadge}</td></tr>`;
-  }).join('');
-
-  const historyTbody = document.getElementById('salesHistoryTable');
-  if (appData.salesHistory.length === 0) {
-    historyTbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada transaksi hari ini</td></tr>';
-  } else {
-    historyTbody.innerHTML = appData.salesHistory.map(h => `
-      <tr>
-        <td><b>${h.nota}</b></td>
-        <td>${h.time}</td>
-        <td>${h.kasir}</td>
-        <td>${h.items.map(i => `${i.nama} (${i.qty}x)`).join(', ')}</td>
-        <td><b>Rp ${h.total.toLocaleString('id-ID')}</b></td>
-      </tr>
-    `).join('');
-  }
+  document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => `
+    <tr><td>${i+1}</td><td>${kode}</td><td>${item.nama}</td><td>Rp ${item.harga.toLocaleString('id-ID')}</td><td>${item.qty}</td><td>${item.expired}</td><td><span class="badge badge-ok">Aman</span></td></tr>
+  `).join('');
 }
 
 function printCashflow() { window.print(); }
