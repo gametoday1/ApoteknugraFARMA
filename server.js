@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const nodemailer = require('nodemailer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,65 +9,64 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-// Database Sementara di Memori (Aman, Tanpa Crash, Tanpa File Eksternal)
-let usersList = [
-    { email: 'admin@test.com', password: 'password123', role: 'owner' }
-];
+// File database JSON lokal (murni kosong/inisialisasi awal array kosong)
+const dbFile = path.join(__dirname, 'users.json');
 
-// Route Utama Membuka Aplikasi
+function getUsers() {
+    if (!fs.existsSync(dbFile)) {
+        fs.writeFileSync(dbFile, JSON.stringify([], null, 2));
+    }
+    return JSON.parse(fs.readFileSync(dbFile, 'utf8'));
+}
+
+function saveUsers(users) {
+    fs.writeFileSync(dbFile, JSON.stringify(users, null, 2));
+}
+
+// Route Utama Membuka Halaman Web
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'APOTEK-FINAL.html'));
 });
 
-// Endpoint Login
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    const user = usersList.find(u => u.email === email && u.password === password);
-    
-    if (!user) {
-        return res.status(401).json({ success: false, message: "Email atau password salah!" });
-    }
-    res.json({ success: true, message: "Login berhasil!", role: user.role });
-});
-
-// Endpoint Register Akun Baru
+// Endpoint Register: Wajib daftar dulu dari web
 app.post('/register', (req, res) => {
     const { email, password, role } = req.body;
+    
     if (!email || !password) {
         return res.status(400).json({ success: false, message: "Email dan password wajib diisi!" });
     }
 
-    const existingUser = usersList.find(u => u.email === email);
+    const cleanEmail = email.trim().toLowerCase();
+    const users = getUsers();
+    
+    const existingUser = users.find(u => u.email === cleanEmail);
     if (existingUser) {
-        return res.status(400).json({ success: false, message: "Email sudah terdaftar!" });
+        return res.status(400).json({ success: false, message: "Email sudah terdaftar, silakan langsung login!" });
     }
 
-    usersList.push({ email, password, role: role || 'kasir' });
-    res.json({ success: true, message: "Akun berhasil didaftarkan! Silakan login." });
+    users.push({ email: cleanEmail, password, role: role || 'owner' });
+    saveUsers(users);
+    
+    res.json({ success: true, message: "Pendaftaran berhasil! Silakan login." });
 });
 
-// Endpoint Kirim Email Laporan
-app.post('/kirim-laporan-email', async (req, res) => {
-    const { emailTujuan } = req.body;
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'emailkamu@gmail.com',
-            pass: 'password_aplikasi_gmail'
-        }
-    });
-
-    try {
-        await transporter.sendMail({
-            from: 'emailkamu@gmail.com',
-            to: emailTujuan,
-            subject: '📊 Laporan Otomatis Bulanan - Apotek Nugrah Farma',
-            text: 'Halo Owner, berikut rekap otomatis bulanan sistem apotek.'
-        });
-        res.json({ success: true, message: "Laporan berhasil dikirim ke email!" });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Gagal mengirim email." });
+// Endpoint Login: Cek mutlak dari data yang sudah didaftarkan
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: "Email dan password wajib diisi!" });
     }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const users = getUsers();
+    
+    const user = users.find(u => u.email === cleanEmail && u.password === password);
+    if (!user) {
+        return res.status(401).json({ success: false, message: "Email atau password salah, atau belum terdaftar!" });
+    }
+    
+    res.json({ success: true, message: "Login berhasil!", role: user.role });
 });
 
 app.listen(PORT, () => {
