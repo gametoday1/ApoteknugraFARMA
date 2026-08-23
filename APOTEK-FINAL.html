@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Kasir & Absensi Lengkap</title>
+  <title>Apotek Nugrah FARMA - Sistem Kasir Siap Operasional</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
@@ -61,7 +61,6 @@
     
     .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
     .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
-    .btn-edit { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin-right: 4px; }
     
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
     table thead { background: #f8f9fa; }
@@ -71,7 +70,6 @@
     .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
     .badge-ok { background: #ecfdf5; color: #10b981; }
     .badge-danger { background: #fee2e2; color: #ef4444; }
-    .badge-warning { background: #fef3c7; color: #d97706; }
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     
@@ -99,7 +97,7 @@
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Login Sistem Kasir & Absensi</p>
+    <p>Login Sistem Kasir Siap Operasional</p>
     <input type="text" id="emailInput" placeholder="Username / Email">
     <input type="password" id="passInput" placeholder="Password">
     <button onclick="doLogin()">MASUK SEKARANG</button>
@@ -122,11 +120,11 @@
   <div class="nav">
     <button class="nav-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
     <button class="nav-btn" onclick="showTab('kasir')">🛒 Kasir / POS</button>
-    <button class="nav-btn" onclick="showTab('barcode')">📦 Input Stok (Barang / Alkes)</button>
+    <button class="nav-btn" onclick="showTab('barcode')">📦 Input Stok</button>
     <button class="nav-btn" onclick="showTab('cashflow')">💰 Cash Flow</button>
     <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis</button>
     <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
-    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi Masuk/Pulang</button>
+    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi</button>
     <button class="nav-btn" onclick="showTab('akun')">⚙️ Akun</button>
   </div>
   
@@ -153,16 +151,30 @@
         </div>
       </div>
       
-      <div class="card">
-        <h3>Transaksi Keuangan Hari Ini</h3>
-        <table>
-          <thead>
-            <tr><th>Jenis</th><th>Deskripsi</th><th>Nominal</th><th>Waktu</th></tr>
-          </thead>
-          <tbody id="dashCashTable">
-            <tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>
-          </tbody>
-        </table>
+      <div class="grid-2">
+        <div class="card">
+          <h3>🔥 Produk / Obat Terlaris (Best Seller)</h3>
+          <table>
+            <thead>
+              <tr><th>Peringkat</th><th>Nama Produk</th><th>Total Terjual</th></tr>
+            </thead>
+            <tbody id="bestSellerTable">
+              <tr><td colspan="3" style="text-align: center;">Belum ada data penjualan</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3>Transaksi Keuangan Hari Ini</h3>
+          <table>
+            <thead>
+              <tr><th>Jenis</th><th>Deskripsi</th><th>Nominal</th><th>Waktu</th></tr>
+            </thead>
+            <tbody id="dashCashTable">
+              <tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -322,10 +334,10 @@
       </div>
     </div>
     
-    <!-- ABSENSI GPS (MASUK & PULANG) -->
+    <!-- ABSENSI GPS -->
     <div id="absensi" class="tab">
       <div class="card">
-        <h3>📍 Absensi Karyawan (Check-In & Check-Out)</h3>
+        <h3>📍 Absensi Karyawan (Shift Pagi & Siang)</h3>
         <div id="mapContainer"></div>
         <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #667eea;">Mendeteksi lokasi GPS apotek...</div>
         <div class="form-grid">
@@ -338,7 +350,6 @@
             <select id="abs_shift">
               <option value="Pagi">🌅 Shift Pagi</option>
               <option value="Siang">☀️ Shift Siang</option>
-              <option value="Malam">🌙 Shift Malam</option>
             </select>
           </div>
         </div>
@@ -365,7 +376,7 @@
     <div id="akun" class="tab">
       <div class="card">
         <h3>⚙️ Pengaturan Sistem</h3>
-        <p>Sistem operasional apotek lengkap dengan absensi masuk/pulang, pencatatan kasir, dan rekap data permanen.</p>
+        <p>Sistem operasional apotek lengkap dengan fitur Shift Pagi/Siang, Absen Masuk/Pulang, Best Seller, Kasir, dan rekap data permanen.</p>
       </div>
     </div>
 
@@ -382,6 +393,7 @@ const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farm
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
   absensiList: JSON.parse(localStorage.getItem('apotek_absensi')) || [],
+  salesCount: JSON.parse(localStorage.getItem('apotek_sales_count')) || {},
   activeKasir: localStorage.getItem('apotek_active_kasir') || 'Belum Absen',
   inventory: JSON.parse(localStorage.getItem('apotek_inventory')) || {
     "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
@@ -611,8 +623,14 @@ function prosesTransaksiKasir() {
 
   posCart.forEach(item => {
     appData.inventory[item.kode].qty -= item.qty;
+    if (!appData.salesCount[item.nama]) {
+      appData.salesCount[item.nama] = 0;
+    }
+    appData.salesCount[item.nama] += item.qty;
   });
+
   localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
+  localStorage.setItem('apotek_sales_count', JSON.stringify(appData.salesCount));
 
   const kasirShift = localStorage.getItem('apotek_active_kasir') || 'Admin';
   const now = new Date();
@@ -725,6 +743,20 @@ function updateAllDisplay() {
   document.getElementById('dashIncome').textContent = 'Rp ' + income.toLocaleString('id-ID');
   document.getElementById('dashExpense').textContent = 'Rp ' + expense.toLocaleString('id-ID');
   document.getElementById('todayAbsen').textContent = appData.absensiList.length;
+
+  const bestSellerTable = document.getElementById('bestSellerTable');
+  const sortedBestSeller = Object.entries(appData.salesCount).sort((a, b) => b[1] - a[1]);
+  if (sortedBestSeller.length === 0) {
+    bestSellerTable.innerHTML = '<tr><td colspan="3" style="text-align: center;">Belum ada data penjualan</td></tr>';
+  } else {
+    bestSellerTable.innerHTML = sortedBestSeller.slice(0, 5).map(([nama, totalQty], i) => `
+      <tr>
+        <td><b>#${i+1}</b></td>
+        <td>${nama}</td>
+        <td><span class="badge badge-ok">${totalQty} Terjual</span></td>
+      </tr>
+    `).join('');
+  }
 
   const dashCashTable = document.getElementById('dashCashTable');
   if (appData.cashflow.length === 0) {
