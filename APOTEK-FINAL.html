@@ -37,7 +37,6 @@
     .tab { display: none; }
     .tab.show { display: block; }
     
-    /* WALLPAPER DASHBOARD FULL & ELEGAN */
     #dashboard {
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.15) 100%), 
                   radial-gradient(circle, #ffffff 0%, #f0f4ff 100%);
@@ -68,7 +67,8 @@
     
     .btn-submit { width: 100%; padding: 11px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
+    .btn-edit { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; margin-right: 4px; }
     
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
     table thead { background: #f8f9fa; }
@@ -109,7 +109,6 @@
     <h1>APOTEK NUGRAH FARMA</h1>
     <p id="authSubtitle">Sistem Inventory & Kasir</p>
     
-    <!-- FORM LOGIN -->
     <div id="formLoginContainer">
       <input type="text" id="emailInput" placeholder="Username / Email">
       <input type="password" id="passInput" placeholder="Password">
@@ -122,7 +121,6 @@
       </div>
     </div>
 
-    <!-- FORM REGISTER (AWALNYA DISENDIRIKAN/HIDDEN) -->
     <div id="formRegisterContainer" style="display: none;">
       <input type="text" id="regEmailInput" placeholder="Buat Username / Email baru">
       <input type="password" id="regPassInput" placeholder="Buat Password baru">
@@ -308,8 +306,7 @@
               <p id="qrisNominal" style="font-weight: 700; color: #10b981; font-size: 16px;">Rp 0</p>
             </div>
 
-            <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; margin-top: 15px;" onclick="prosesTransaksiKasir('browser')">✅ Bayar dan Cetak Struk</button>
-            <button class="btn-submit" style="background: #3b82f6; color: white; margin-top: 10px;" onclick="prosesTransaksiKasir('bluetooth')">🖨️ Cetak Langsung via Bluetooth (Android)</button>
+            <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; margin-top: 15px;" onclick="prosesTransaksiKasir()">✅ Bayar dan Cetak Struk</button>
           </div>
         </div>
       </div>
@@ -460,13 +457,14 @@
     <div id="opname" class="tab">
       <div class="card">
         <h3>📋 Laporan Stok Opname & Status Kedaluwarsa</h3>
+        <p style="font-size: 12px; color: #667eea; margin-bottom: 12px;">💡 Anda bisa langsung Edit atau Hapus data obat jika terjadi kesalahan input harga atau stok.</p>
         <button class="btn-submit" style="width: auto; padding: 8px 16px; margin-bottom: 16px;" onclick="printOpname()">🖨️ Cetak Laporan</button>
         <table>
           <thead>
-            <tr><th>No</th><th>Kode</th><th>Nama Obat</th><th>Harga Jual</th><th>Stok Fisik</th><th>Expired Date</th><th>Status</th></tr>
+            <tr><th>No</th><th>Kode</th><th>Nama Obat</th><th>Harga Jual</th><th>Stok Fisik</th><th>Expired Date</th><th>Status</th><th>Aksi</th></tr>
           </thead>
           <tbody id="opnameTable">
-            <tr><td colspan="7" style="text-align: center;">-</td></tr>
+            <tr><td colspan="8" style="text-align: center;">-</td></tr>
           </tbody>
         </table>
       </div>
@@ -507,6 +505,9 @@
   </div>
 </div>
 
+<!-- IFRAME TERSEMBUNYI KHUSUS CETAK STRUK KASIR -->
+<iframe id="printFrame" style="display:none;"></iframe>
+
 <script>
 let deviceId = localStorage.getItem('apotek_device_id');
 if (!deviceId) {
@@ -526,7 +527,6 @@ window.onload = function() {
   }
 };
 
-// Fungsi Toggle Ganti Tampilan Antara Form Login & Form Register
 function toggleAuthMode(mode) {
   if (mode === 'register') {
     document.getElementById('formLoginContainer').style.display = 'none';
@@ -539,7 +539,6 @@ function toggleAuthMode(mode) {
   }
 }
 
-// Fungsi Daftar Akun Baru dari Frontend
 async function doRegister() {
   const email = document.getElementById('regEmailInput').value.trim();
   const password = document.getElementById('regPassInput').value.trim();
@@ -730,22 +729,102 @@ function hitungKembalian() {
   document.getElementById('pos_kembalian').value = kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang';
 }
 
+// ===== FUNGSI PROSES KASIR & CETAK KHUSUS STRUK SAJA =====
 function prosesTransaksiKasir() {
   if (posCart.length === 0) return alert('❌ Keranjang kosong!');
   const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
-  
+  const metode = document.getElementById('pos_metode').value;
+  let bayar = total, kembali = 0;
+
+  if (metode === 'CASH') {
+    bayar = parseInt(document.getElementById('pos_bayar').value) || 0;
+    if (bayar < total) return alert('❌ Uang pembayaran kurang!');
+    kembali = bayar - total;
+  }
+
   posCart.forEach(item => {
     appData.inventory[item.kode].qty -= item.qty;
   });
-  
-  appData.cashflow.push({ type: 'INCOME', source: 'Penjualan Kasir', amount: total, desc: 'Nota Penjualan', time: '12:00', date: 'Hari Ini' });
-  appData.salesHistory.unshift({ nota: 'NOTA-' + Math.floor(1000 + Math.random() * 9000), time: 'Baru saja', kasir: 'Kasir', items: [...posCart], total });
 
-  window.print();
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
+  const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
+  
+  appData.cashflow.push({ type: 'INCOME', source: `Penjualan Kasir (${metode})`, amount: total, desc: `Nota: ${notaId}`, time: timeStr, date: dateStr });
+  appData.salesHistory.unshift({ nota: notaId, time: `${dateStr} ${timeStr}`, kasir: `Kasir (${metode})`, items: [...posCart], total });
+
+  // CETAK KHUSUS STRUK (TIDAK MEMBUKA HALAMAN UTAMA)
+  cetakStrukKhusus(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId);
+
   posCart = [];
+  document.getElementById('pos_bayar').value = '';
   renderPosCart();
   updateAllDisplay();
-  alert('✅ Transaksi Berhasil!');
+  alert(`✅ Transaksi ${notaId} Berhasil!`);
+}
+
+function cetakStrukKhusus(items, total, bayar, kembali, metode, time, date, notaId) {
+  const frame = document.getElementById('printFrame');
+  const doc = frame.contentWindow.document;
+
+  doc.open();
+  doc.write(`
+    <html>
+      <head>
+        <title>Struk - ${notaId}</title>
+        <style>
+          body { font-family: 'Courier New', monospace; font-size: 13px; width: 280px; margin: 0; padding: 5px; color: #000; }
+          .center { text-align: center; }
+          .line { border-bottom: 1.5px dashed #000; margin: 6px 0; }
+          .flex { display: flex; justify-content: space-between; }
+          h3 { margin: 0 0 4px 0; font-size: 16px; }
+        </style>
+      </head>
+      <body>
+        <div class="center">
+          <h3>APOTEK NUGRAH FARMA</h3>
+          <div style="font-size: 11px;">Jl. Poros Kdi.- Moramo, Konawe Selatan<br>WA: 0822-9037-3427</div>
+        </div>
+        <div class="line"></div>
+        <div style="font-size: 11px;">Nota: ${notaId}</div>
+        <div style="font-size: 11px;">Tgl: ${date} ${time}</div>
+        <div style="font-size: 11px;">Metode: ${metode}</div>
+        <div class="line"></div>
+        ${items.map(i => `
+          <div style="font-weight: bold; margin-top: 3px;">${i.nama}</div>
+          <div class="flex">
+            <span>${i.qty} x ${i.harga.toLocaleString('id-ID')}</span>
+            <span>Rp ${i.subtotal.toLocaleString('id-ID')}</span>
+          </div>
+        `).join('')}
+        <div class="line"></div>
+        <div class="flex" style="font-size: 14px; font-weight: bold;">
+          <span>TOTAL:</span>
+          <span>Rp ${total.toLocaleString('id-ID')}</span>
+        </div>
+        ${metode === 'CASH' ? `
+        <div class="flex">
+          <span>BAYAR:</span>
+          <span>Rp ${bayar.toLocaleString('id-ID')}</span>
+        </div>
+        <div class="flex">
+          <span>KEMBALI:</span>
+          <span>Rp ${kembali.toLocaleString('id-ID')}</span>
+        </div>` : ''}
+        <div class="line"></div>
+        <div class="center" style="font-size: 11px; margin-top: 6px;">
+          Terima Kasih Atas Kunjungan Anda<br><strong>Semoga Lekas Sembuh</strong>
+        </div>
+      </body>
+    </html>
+  `);
+  doc.close();
+
+  setTimeout(() => {
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+  }, 250);
 }
 
 function simpanStokBarcode() {
@@ -766,6 +845,35 @@ function simpanStokBarcode() {
   filterPosObatList();
   updateAllDisplay();
   alert('✅ Stok berhasil disimpan!');
+}
+
+function editStokOpname(kode) {
+  const item = appData.inventory[kode];
+  if (!item) return;
+
+  const namaBaru = prompt("Edit Nama Obat:", item.nama);
+  if (namaBaru === null) return;
+  const hargaBaru = prompt("Edit Harga Jual (Rp):", item.harga);
+  if (hargaBaru === null) return;
+  const qtyBaru = prompt("Edit Stok Fisik:", item.qty);
+  if (qtyBaru === null) return;
+
+  item.nama = namaBaru.trim() || item.nama;
+  item.harga = parseInt(hargaBaru) || item.harga;
+  item.qty = parseInt(qtyBaru) >= 0 ? parseInt(qtyBaru) : item.qty;
+
+  filterPosObatList();
+  updateAllDisplay();
+  alert("✅ Data Stok Opname berhasil diperbarui!");
+}
+
+function hapusStokOpname(kode) {
+  if (confirm(`Yakin ingin menghapus obat dengan kode ${kode} dari sistem?`)) {
+    delete appData.inventory[kode];
+    filterPosObatList();
+    updateAllDisplay();
+    alert("✅ Data berhasil dihapus!");
+  }
 }
 
 function tambahPemasukan() {
@@ -810,9 +918,28 @@ function updateAllDisplay() {
   document.getElementById('kritisList').innerHTML = criticalArr.length === 0 ? '<p style="text-align: center; color: #999;">✅ Semua stok aman</p>' : 
     `<table><thead><tr><th>Kode</th><th>Nama Obat</th><th>Stok</th></tr></thead><tbody>` + criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td></tr>`).join('') + `</tbody></table>`;
 
-  document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => `
-    <tr><td>${i+1}</td><td>${kode}</td><td>${item.nama}</td><td>Rp ${item.harga.toLocaleString('id-ID')}</td><td>${item.qty}</td><td>${item.expired}</td><td><span class="badge badge-ok">Aman</span></td></tr>
-  `).join('');
+  const todayDate = new Date();
+  document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => {
+    let expDate = new Date(item.expired || '2028-01-01');
+    let diffDays = Math.ceil((expDate - todayDate) / (1000 * 60 * 60 * 24));
+    let expBadge = diffDays < 90 ? `<span class="badge badge-danger">Hampir Exp</span>` : `<span class="badge badge-ok">Aman</span>`;
+    
+    return `
+      <tr>
+        <td>${i+1}</td>
+        <td>${kode}</td>
+        <td>${item.nama}</td>
+        <td>Rp ${(item.harga || 0).toLocaleString('id-ID')}</td>
+        <td>${item.qty}</td>
+        <td>${item.expired || '2028-01-01'}</td>
+        <td>${expBadge}</td>
+        <td>
+          <button class="btn-edit" onclick="editStokOpname('${kode}')">Edit</button>
+          <button class="btn-danger" onclick="hapusStokOpname('${kode}')">Hapus</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function printCashflow() { window.print(); }
