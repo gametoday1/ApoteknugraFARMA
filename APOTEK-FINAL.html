@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Siap Operasional</title>
+  <title>Apotek Nugrah FARMA - Sistem Kasir & Absensi Lengkap</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
@@ -71,6 +71,7 @@
     .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
     .badge-ok { background: #ecfdf5; color: #10b981; }
     .badge-danger { background: #fee2e2; color: #ef4444; }
+    .badge-warning { background: #fef3c7; color: #d97706; }
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     
@@ -98,7 +99,7 @@
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Login Sistem Kasir Siap Operasional</p>
+    <p>Login Sistem Kasir & Absensi</p>
     <input type="text" id="emailInput" placeholder="Username / Email">
     <input type="password" id="passInput" placeholder="Password">
     <button onclick="doLogin()">MASUK SEKARANG</button>
@@ -125,7 +126,7 @@
     <button class="nav-btn" onclick="showTab('cashflow')">💰 Cash Flow</button>
     <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis</button>
     <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
-    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi & Shift</button>
+    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi Masuk/Pulang</button>
     <button class="nav-btn" onclick="showTab('akun')">⚙️ Akun</button>
   </div>
   
@@ -147,7 +148,7 @@
           <div class="stat-value" id="criticalCount">0</div>
         </div>
         <div class="stat-card success">
-          <div>✋ Absensi Masuk</div>
+          <div>✋ Total Absen Hari Ini</div>
           <div class="stat-value" id="todayAbsen">0</div>
         </div>
       </div>
@@ -321,15 +322,15 @@
       </div>
     </div>
     
-    <!-- ABSENSI GPS -->
+    <!-- ABSENSI GPS (MASUK & PULANG) -->
     <div id="absensi" class="tab">
       <div class="card">
-        <h3>📍 Absensi Karyawan & Shift Kasir</h3>
+        <h3>📍 Absensi Karyawan (Check-In & Check-Out)</h3>
         <div id="mapContainer"></div>
         <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #667eea;">Mendeteksi lokasi GPS apotek...</div>
         <div class="form-grid">
           <div class="form-group">
-            <label>Nama Karyawan / Kasir</label>
+            <label>Nama Karyawan</label>
             <input type="text" id="abs_nama" placeholder="Contoh: Novi">
           </div>
           <div class="form-group">
@@ -341,17 +342,20 @@
             </select>
           </div>
         </div>
-        <button class="btn-submit" onclick="catatAbsensi()">✋ Absen Masuk & Mulai Shift</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-submit" style="background: #10b981;" onclick="catatAbsensi('MASUK')">🟢 Absen Masuk (Check-In)</button>
+          <button class="btn-submit" style="background: #ef4444;" onclick="catatAbsensi('PULANG')">🔴 Absen Pulang (Check-Out)</button>
+        </div>
       </div>
 
       <div class="card" style="margin-top: 20px;">
         <h3>📋 Riwayat Rekap Absensi Tersimpan</h3>
         <table>
           <thead>
-            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Waktu Absen</th></tr>
+            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Status</th><th>Waktu</th></tr>
           </thead>
           <tbody id="absensiHistoryTable">
-            <tr><td colspan="4" style="text-align: center;">Belum ada riwayat absensi</td></tr>
+            <tr><td colspan="5" style="text-align: center;">Belum ada riwayat absensi</td></tr>
           </tbody>
         </table>
       </div>
@@ -361,7 +365,7 @@
     <div id="akun" class="tab">
       <div class="card">
         <h3>⚙️ Pengaturan Sistem</h3>
-        <p>Semua data (Stok, Transaksi, Cash Flow, dan Rekap Absensi) kini tersimpan permanen secara lokal di perangkat Anda.</p>
+        <p>Sistem operasional apotek lengkap dengan absensi masuk/pulang, pencatatan kasir, dan rekap data permanen.</p>
       </div>
     </div>
 
@@ -375,7 +379,6 @@ let map = null;
 let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 
-// Ambil data tersimpan dari LocalStorage (jika ada)
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
   absensiList: JSON.parse(localStorage.getItem('apotek_absensi')) || [],
@@ -462,7 +465,7 @@ function initMapAbsensi() {
   }
 }
 
-function catatAbsensi() {
+function catatAbsensi(statusAbsen) {
   const nama = document.getElementById('abs_nama').value.trim();
   const shift = document.getElementById('abs_shift').value;
   if (!nama) return alert('❌ Masukkan nama karyawan terlebih dahulu!');
@@ -471,15 +474,17 @@ function catatAbsensi() {
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
 
-  appData.activeKasir = `${nama} (Shift ${shift})`;
-  localStorage.setItem('apotek_active_kasir', appData.activeKasir);
+  if (statusAbsen === 'MASUK') {
+    appData.activeKasir = `${nama} (Shift ${shift})`;
+    localStorage.setItem('apotek_active_kasir', appData.activeKasir);
+  }
 
-  appData.absensiList.push({ nama, shift, waktu: `${dateStr} ${timeStr}` });
+  appData.absensiList.push({ nama, shift, status: statusAbsen, waktu: `${dateStr} ${timeStr}` });
   localStorage.setItem('apotek_absensi', JSON.stringify(appData.absensiList));
 
   loadActiveKasir();
   updateAllDisplay();
-  alert(`✅ Absensi berhasil! Kasir bertugas sekarang: ${appData.activeKasir}`);
+  alert(`✅ Absen ${statusAbsen} berhasil dicatat untuk ${nama} (Shift ${shift})!`);
   document.getElementById('abs_nama').value = '';
 }
 
@@ -721,7 +726,6 @@ function updateAllDisplay() {
   document.getElementById('dashExpense').textContent = 'Rp ' + expense.toLocaleString('id-ID');
   document.getElementById('todayAbsen').textContent = appData.absensiList.length;
 
-  // Render Tabel Cashflow di Dashboard
   const dashCashTable = document.getElementById('dashCashTable');
   if (appData.cashflow.length === 0) {
     dashCashTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>';
@@ -736,16 +740,16 @@ function updateAllDisplay() {
     `).join('');
   }
 
-  // Render Tabel Riwayat Absensi
   const absenTable = document.getElementById('absensiHistoryTable');
   if (appData.absensiList.length === 0) {
-    absenTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada riwayat absensi</td></tr>';
+    absenTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada riwayat absensi</td></tr>';
   } else {
-    absenTable.innerHTML = appData.absensiList.map((a, i) => `
+    absenTable.innerHTML = appData.absensiList.slice().reverse().map((a, i) => `
       <tr>
         <td>${i+1}</td>
         <td>${a.nama}</td>
-        <td><b>Shift ${a.shift}</b></td>
+        <td>Shift ${a.shift}</td>
+        <td><span class="badge ${a.status === 'MASUK' ? 'badge-ok' : 'badge-danger'}">${a.status}</span></td>
         <td>${a.waktu}</td>
       </tr>
     `).join('');
