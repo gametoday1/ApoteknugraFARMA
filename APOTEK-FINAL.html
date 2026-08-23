@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Mesin Kasir</title>
+  <title>Apotek Nugrah FARMA - Sistem Lengkap</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
@@ -74,7 +74,16 @@
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     
-    #mapContainer { width: 100%; height: 350px; border-radius: 12px; margin-bottom: 20px; }
+    #mapContainer { 
+      width: 100% !important; 
+      height: 380px !important; 
+      min-height: 380px !important;
+      border-radius: 10px; 
+      margin-bottom: 15px; 
+      border: 1.5px solid #e2e8f0; 
+      display: block !important;
+    }
+    
     .qris-box { background: #f8f9fa; border: 2px dashed #667eea; border-radius: 12px; padding: 15px; text-align: center; margin-top: 15px; }
     .qris-box img { width: 160px; height: 160px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; }
 
@@ -89,7 +98,7 @@
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Kasir & Inventory Mesin Kasir</p>
+    <p>Sistem Kasir & Absensi GPS</p>
     <input type="text" id="emailInput" placeholder="Username / Email">
     <input type="password" id="passInput" placeholder="Password">
     <button onclick="doLogin()">MASUK SEKARANG</button>
@@ -103,7 +112,7 @@
     <div class="header-content">
       <div>
         <h1>Apotek Nugrah FARMA</h1>
-        <p id="deviceRoleInfo">Mode Mesin Kasir Paket | WA: 0822-9037-3427</p>
+        <p id="deviceRoleInfo">Mode Lengkap & Absensi GPS | WA: 0822-9037-3427</p>
       </div>
       <button onclick="doLogout()">Logout</button>
     </div>
@@ -112,11 +121,11 @@
   <div class="nav">
     <button class="nav-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
     <button class="nav-btn" onclick="showTab('kasir')">🛒 Kasir / POS</button>
-    <button class="nav-btn" onclick="showTab('barcode')">📦 Input Stok & Scan</button>
+    <button class="nav-btn" onclick="showTab('barcode')">📦 Input Stok (Barang / Alkes)</button>
     <button class="nav-btn" onclick="showTab('cashflow')">💰 Cash Flow</button>
     <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis</button>
     <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
-    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi</button>
+    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi GPS</button>
     <button class="nav-btn" onclick="showTab('akun')">⚙️ Akun</button>
   </div>
   
@@ -160,15 +169,15 @@
     <div id="kasir" class="tab">
       <div class="grid-2">
         <div class="card">
-          <h3>💊 Pilih Obat / Produk (Scan Barcode Langsung)</h3>
+          <h3>💊 Pilih Obat / Alkes (Scan Barcode / Ketik)</h3>
           <div class="form-group" style="margin-bottom: 12px;">
-            <label>Scan Barcode atau Ketik Nama Obat</label>
-            <input type="text" id="pos_search_obat" placeholder="Scan barcode di sini..." oninput="filterPosObatList()">
+            <label>Scan Barcode atau Ketik Nama Produk</label>
+            <input type="text" id="pos_search_obat" placeholder="Scan barcode / ketik nama..." oninput="filterPosObatList()">
           </div>
           <div class="form-group" style="margin-bottom: 12px;">
             <label>Hasil Pencarian</label>
             <select id="pos_select_obat" size="4" style="height: 110px;" onchange="pilihObatDariDropdown()">
-              <option value="">-- Scan barcode atau ketik obat --</option>
+              <option value="">-- Ketik atau scan produk --</option>
             </select>
           </div>
           <div class="form-grid">
@@ -188,7 +197,7 @@
           <h3>🛒 Keranjang Belanja</h3>
           <table>
             <thead>
-              <tr><th>Obat</th><th>Harga</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr>
+              <tr><th>Produk</th><th>Harga</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr>
             </thead>
             <tbody id="posCartTable">
               <tr><td colspan="5" style="text-align: center;">Keranjang Kosong</td></tr>
@@ -232,11 +241,11 @@
       </div>
     </div>
     
-    <!-- SCAN & STOK -->
+    <!-- INPUT STOK & ALKES -->
     <div id="barcode" class="tab">
       <div class="card">
-        <h3>📦 Input Stok via Mesin Scanner</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Arahkan mesin scanner fisik ke barcode produk untuk mengisi kode secara otomatis.</p>
+        <h3>📦 Input Stok Obat / Alkes (Bisa Tanpa Barcode)</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Jika produk tidak punya barcode (seperti Alkes/Racikan), ketik kode manual (misal: <b>ALK001</b>).</p>
         
         <div class="form-grid">
           <div class="form-group">
@@ -247,12 +256,12 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Kode Obat / Barcode</label>
-            <input type="text" id="bc_kode" placeholder="Scan barcode di sini...">
+            <label>Kode Produk / Buat Manual</label>
+            <input type="text" id="bc_kode" placeholder="Scan barcode atau ketik kode...">
           </div>
           <div class="form-group">
-            <label>Nama Obat</label>
-            <input type="text" id="bc_obat" placeholder="Nama obat...">
+            <label>Nama Produk / Alkes</label>
+            <input type="text" id="bc_obat" placeholder="Nama obat atau alat kesehatan...">
           </div>
           <div class="form-group">
             <label>Harga Jual (Rp)</label>
@@ -303,7 +312,7 @@
         <h3>📋 Stok Opname & Manajemen Harga</h3>
         <table>
           <thead>
-            <tr><th>No</th><th>Kode</th><th>Nama Obat</th><th>Harga</th><th>Stok</th><th>Expired</th><th>Aksi</th></tr>
+            <tr><th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga</th><th>Stok</th><th>Expired</th><th>Aksi</th></tr>
           </thead>
           <tbody id="opnameTable">
             <tr><td colspan="7" style="text-align: center;">-</td></tr>
@@ -312,25 +321,27 @@
       </div>
     </div>
     
-    <!-- ABSENSI -->
+    <!-- ABSENSI GPS -->
     <div id="absensi" class="tab">
-      <div id="mapContainer"></div>
       <div class="card">
-        <h3>📍 Absensi Karyawan GPS</h3>
+        <h3>📍 Absensi Karyawan Berbasis GPS</h3>
+        <div id="mapContainer"></div>
+        <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #667eea;">Mendeteksi lokasi GPS apotek...</div>
         <div class="form-grid">
           <div class="form-group">
             <label>Nama Karyawan</label>
-            <input type="text" id="abs_nama" placeholder="Nama lengkap">
+            <input type="text" id="abs_nama" placeholder="Nama lengkap karyawan">
           </div>
           <div class="form-group">
             <label>Shift Kerja</label>
             <select id="abs_shift">
               <option value="Pagi">🌅 Shift Pagi</option>
               <option value="Siang">☀️ Shift Siang</option>
+              <option value="Malam">🌙 Shift Malam</option>
             </select>
           </div>
         </div>
-        <button class="btn-submit" onclick="alert('✅ Absensi berhasil dicatat!')">✋ Absen Masuk</button>
+        <button class="btn-submit" onclick="catatAbsensi()">✋ Absen Masuk Sekarang</button>
       </div>
     </div>
 
@@ -338,7 +349,7 @@
     <div id="akun" class="tab">
       <div class="card">
         <h3>⚙️ Pengaturan Sistem</h3>
-        <p>Sistem terintegrasi penuh dengan mesin kasir dan printer thermal.</p>
+        <p>Sistem terintegrasi penuh: Mesin Kasir, Input Alkes Tanpa Barcode, Absensi GPS, dan Cetak Struk Thermal.</p>
       </div>
     </div>
 
@@ -348,6 +359,10 @@
 <iframe id="printFrame" style="display:none;"></iframe>
 
 <script>
+let map = null;
+let marker = null;
+const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
+
 window.onload = function() {
   const role = localStorage.getItem('apotek_role');
   if (role) {
@@ -380,9 +395,11 @@ function doLogout() {
 let appData = {
   cashflow: [],
   salesHistory: [],
+  absensiList: [],
   inventory: {
     "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
-    "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" }
+    "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
+    "ALK001": { nama: "Tensimeter Digital OneMed", qty: 15, harga: 250000, expired: "2030-01-01" }
   }
 };
 
@@ -393,9 +410,58 @@ function showTab(tab) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(tab).classList.add('show');
   if (event && event.target) event.target.classList.add('active');
+
+  if (tab === 'absensi') {
+    setTimeout(() => {
+      initMapAbsensi();
+    }, 250);
+  }
 }
 
-/* Integrasi Scanner Fisik untuk Tab Scan Stok */
+function initMapAbsensi() {
+  const container = document.getElementById('mapContainer');
+  if (!container) return;
+
+  if (!map) {
+    map = L.map('mapContainer').setView([APOTEK_LOCATION.lat, APOTEK_LOCATION.lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    marker = L.marker([APOTEK_LOCATION.lat, APOTEK_LOCATION.lng]).addTo(map)
+      .bindPopup(`<b>${APOTEK_LOCATION.name}</b>`).openPopup();
+  } else {
+    map.invalidateSize();
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+      map.setView([userLat, userLng], 17);
+      marker.setLatLng([userLat, userLng]).bindPopup("<b>Lokasi Anda Saat Ini</b>").openPopup();
+      document.getElementById('locationStatus').textContent = "✅ Lokasi GPS Anda berhasil terdeteksi!";
+    }, (error) => {
+      document.getElementById('locationStatus').textContent = "⚠️ GPS tidak aktif, menggunakan lokasi default apotek.";
+    }, { timeout: 10000 });
+  }
+}
+
+function catatAbsensi() {
+  const nama = document.getElementById('abs_nama').value.trim();
+  const shift = document.getElementById('abs_shift').value;
+  if (!nama) return alert('❌ Masukkan nama karyawan terlebih dahulu!');
+
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
+
+  appData.absensiList.push({ nama, shift, waktu: `${dateStr} ${timeStr}` });
+  document.getElementById('todayAbsen').textContent = appData.absensiList.length;
+  alert(`✅ Absensi berhasil dicatat untuk ${nama} (Shift ${shift})!`);
+  document.getElementById('abs_nama').value = '';
+}
+
 document.getElementById('bc_kode').addEventListener('input', function() {
   const code = this.value.trim();
   const obat = appData.inventory[code];
@@ -406,7 +472,6 @@ document.getElementById('bc_kode').addEventListener('input', function() {
   }
 });
 
-/* Integrasi Scanner Fisik untuk Tab Kasir / POS */
 document.getElementById('pos_search_obat').addEventListener('input', function() {
   const keyword = this.value.trim();
   if (appData.inventory[keyword]) {
@@ -429,7 +494,7 @@ function filterPosObatList() {
       count++;
     }
   });
-  if (count === 0) select.innerHTML = '<option value="">-- Obat tidak ditemukan --</option>';
+  if (count === 0) select.innerHTML = '<option value="">-- Produk tidak ditemukan --</option>';
   else select.selectedIndex = 0;
   pilihObatDariDropdown();
 }
@@ -463,7 +528,7 @@ function tambahKeKeranjang() {
   const harga = parseInt(document.getElementById('pos_harga').value);
   const qty = parseInt(document.getElementById('pos_qty').value);
 
-  if (!kode || !appData.inventory[kode]) return alert('❌ Pilih obat!');
+  if (!kode || !appData.inventory[kode]) return alert('❌ Pilih produk!');
   if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup!`);
 
   const existing = posCart.find(i => i.kode === kode);
@@ -602,7 +667,7 @@ function simpanStokBarcode() {
   const qty = parseInt(document.getElementById('bc_qty').value);
   const expired = document.getElementById('bc_expired').value;
 
-  if (!kode || !obat) return alert('❌ Lengkapi data obat!');
+  if (!kode || !obat) return alert('❌ Lengkapi data produk / alkes!');
   if (!appData.inventory[kode]) {
     appData.inventory[kode] = { nama: obat, qty: 0, harga: harga, expired: expired || '2028-01-01' };
   }
@@ -611,7 +676,7 @@ function simpanStokBarcode() {
 
   filterPosObatList();
   updateAllDisplay();
-  alert('✅ Stok berhasil diperbarui!');
+  alert('✅ Stok produk / alkes berhasil diperbarui!');
 }
 
 function updateAllDisplay() {
@@ -621,7 +686,7 @@ function updateAllDisplay() {
   let criticalArr = Object.entries(appData.inventory).filter(([k, v]) => v.qty < 20);
   document.getElementById('criticalCount').textContent = criticalArr.length;
   document.getElementById('kritisList').innerHTML = criticalArr.length === 0 ? '<p style="text-align: center; color: #999;">✅ Semua stok aman</p>' : 
-    `<table><thead><tr><th>Kode</th><th>Nama Obat</th><th>Stok</th></tr></thead><tbody>` + criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td></tr>`).join('') + `</tbody></table>`;
+    `<table><thead><tr><th>Kode</th><th>Nama Produk</th><th>Stok</th></tr></thead><tbody>` + criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td></tr>`).join('') + `</tbody></table>`;
 
   document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => `
     <tr>
