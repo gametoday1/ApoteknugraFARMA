@@ -729,7 +729,6 @@ function hitungKembalian() {
   document.getElementById('pos_kembalian').value = kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang';
 }
 
-// ===== FUNGSI PROSES KASIR & CETAK KHUSUS STRUK SAJA =====
 function prosesTransaksiKasir() {
   if (posCart.length === 0) return alert('❌ Keranjang kosong!');
   const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
@@ -754,7 +753,6 @@ function prosesTransaksiKasir() {
   appData.cashflow.push({ type: 'INCOME', source: `Penjualan Kasir (${metode})`, amount: total, desc: `Nota: ${notaId}`, time: timeStr, date: dateStr });
   appData.salesHistory.unshift({ nota: notaId, time: `${dateStr} ${timeStr}`, kasir: `Kasir (${metode})`, items: [...posCart], total });
 
-  // CETAK KHUSUS STRUK (TIDAK MEMBUKA HALAMAN UTAMA)
   cetakStrukKhusus(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId);
 
   posCart = [];
@@ -764,6 +762,7 @@ function prosesTransaksiKasir() {
   alert(`✅ Transaksi ${notaId} Berhasil!`);
 }
 
+// FORMAT STRUK THERMAL 58mm YANG RAPI & PAS
 function cetakStrukKhusus(items, total, bayar, kembali, metode, time, date, notaId) {
   const frame = document.getElementById('printFrame');
   const doc = frame.contentWindow.document;
@@ -774,46 +773,47 @@ function cetakStrukKhusus(items, total, bayar, kembali, metode, time, date, nota
       <head>
         <title>Struk - ${notaId}</title>
         <style>
-          body { font-family: 'Courier New', monospace; font-size: 13px; width: 280px; margin: 0; padding: 5px; color: #000; }
+          @page { size: 58mm auto; margin: 0; }
+          body { font-family: 'Courier New', Courier, monospace; font-size: 11px; width: 52mm; margin: 0 auto; padding: 2mm; color: #000; line-height: 1.2; }
           .center { text-align: center; }
-          .line { border-bottom: 1.5px dashed #000; margin: 6px 0; }
+          .line { border-bottom: 1px dashed #000; margin: 4px 0; }
           .flex { display: flex; justify-content: space-between; }
-          h3 { margin: 0 0 4px 0; font-size: 16px; }
+          h3 { margin: 0 0 2px 0; font-size: 13px; font-weight: bold; }
         </style>
       </head>
       <body>
         <div class="center">
           <h3>APOTEK NUGRAH FARMA</h3>
-          <div style="font-size: 11px;">Jl. Poros Kdi.- Moramo, Konawe Selatan<br>WA: 0822-9037-3427</div>
+          <div style="font-size: 9px;">Jl. Poros Kdi.- Moramo, Konawe Selatan<br>WA: 0822-9037-3427</div>
         </div>
         <div class="line"></div>
-        <div style="font-size: 11px;">Nota: ${notaId}</div>
-        <div style="font-size: 11px;">Tgl: ${date} ${time}</div>
-        <div style="font-size: 11px;">Metode: ${metode}</div>
+        <div style="font-size: 9px;">Nota: ${notaId}</div>
+        <div style="font-size: 9px;">Tgl: ${date} ${time}</div>
+        <div style="font-size: 9px;">Metode: ${metode}</div>
         <div class="line"></div>
         ${items.map(i => `
-          <div style="font-weight: bold; margin-top: 3px;">${i.nama}</div>
+          <div style="font-weight: bold; margin-top: 2px;">${i.nama}</div>
           <div class="flex">
             <span>${i.qty} x ${i.harga.toLocaleString('id-ID')}</span>
             <span>Rp ${i.subtotal.toLocaleString('id-ID')}</span>
           </div>
         `).join('')}
         <div class="line"></div>
-        <div class="flex" style="font-size: 14px; font-weight: bold;">
+        <div class="flex" style="font-size: 12px; font-weight: bold;">
           <span>TOTAL:</span>
           <span>Rp ${total.toLocaleString('id-ID')}</span>
         </div>
         ${metode === 'CASH' ? `
-        <div class="flex">
+        <div class="flex" style="font-size: 10px;">
           <span>BAYAR:</span>
           <span>Rp ${bayar.toLocaleString('id-ID')}</span>
         </div>
-        <div class="flex">
+        <div class="flex" style="font-size: 10px;">
           <span>KEMBALI:</span>
           <span>Rp ${kembali.toLocaleString('id-ID')}</span>
         </div>` : ''}
         <div class="line"></div>
-        <div class="center" style="font-size: 11px; margin-top: 6px;">
+        <div class="center" style="font-size: 9px; margin-top: 4px;">
           Terima Kasih Atas Kunjungan Anda<br><strong>Semoga Lekas Sembuh</strong>
         </div>
       </body>
