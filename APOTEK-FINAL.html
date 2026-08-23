@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Lengkap</title>
+  <title>Apotek Nugrah FARMA - Sistem Kasir</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
@@ -98,8 +98,8 @@
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Kasir & Absensi GPS</p>
-    <input type="text" id="emailInput" placeholder="Username / Email">
+    <p>Masukkan Nama Kasir & Password</p>
+    <input type="text" id="kasirNameInput" placeholder="Nama Kasir (Contoh: Novi)">
     <input type="password" id="passInput" placeholder="Password">
     <button onclick="doLogin()">MASUK SEKARANG</button>
     <p id="loginError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
@@ -112,7 +112,7 @@
     <div class="header-content">
       <div>
         <h1>Apotek Nugrah FARMA</h1>
-        <p id="deviceRoleInfo">Mode Lengkap & Absensi GPS | WA: 0822-9037-3427</p>
+        <p id="deviceRoleInfo">Kasir Aktif: <span id="activeKasirLabel" style="font-weight: bold; color: #ffeb3b;">-</span> | WA: 0822-9037-3427</p>
       </div>
       <button onclick="doLogout()">Logout</button>
     </div>
@@ -349,7 +349,7 @@
     <div id="akun" class="tab">
       <div class="card">
         <h3>⚙️ Pengaturan Sistem</h3>
-        <p>Sistem terintegrasi penuh: Mesin Kasir, Input Alkes Tanpa Barcode, Absensi GPS, dan Cetak Struk Thermal.</p>
+        <p>Sistem terintegrasi penuh: Mesin Kasir, Cetak Struk dengan Nama Kasir (di bawah Metode), Absensi GPS.</p>
       </div>
     </div>
 
@@ -364,31 +364,39 @@ let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 
 window.onload = function() {
-  const role = localStorage.getItem('apotek_role');
-  if (role) {
+  const savedKasir = localStorage.getItem('apotek_kasir_name');
+  if (savedKasir) {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('appPage').classList.add('show');
+    document.getElementById('activeKasirLabel').textContent = savedKasir;
     filterPosObatList();
     updateAllDisplay();
   }
 };
 
 function doLogin() {
-  const email = document.getElementById('emailInput').value.trim();
+  const kasirName = document.getElementById('kasirNameInput').value.trim();
   const pass = document.getElementById('passInput').value.trim();
-  if (email && pass) {
-    localStorage.setItem('apotek_role', 'admin');
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('appPage').classList.add('show');
-    filterPosObatList();
-    updateAllDisplay();
-  } else {
-    document.getElementById('loginError').textContent = "❌ Masukkan username & password!";
+  
+  if (!kasirName) {
+    document.getElementById('loginError').textContent = "❌ Masukkan nama kasir (misal: Novi)!";
+    return;
   }
+  if (!pass) {
+    document.getElementById('loginError').textContent = "❌ Masukkan password!";
+    return;
+  }
+
+  localStorage.setItem('apotek_kasir_name', kasirName);
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appPage').classList.add('show');
+  document.getElementById('activeKasirLabel').textContent = kasirName;
+  filterPosObatList();
+  updateAllDisplay();
 }
 
 function doLogout() {
-  localStorage.removeItem('apotek_role');
+  localStorage.removeItem('apotek_kasir_name');
   location.reload();
 }
 
@@ -579,14 +587,15 @@ function prosesTransaksiKasir() {
     appData.inventory[item.kode].qty -= item.qty;
   });
 
+  const kasirName = localStorage.getItem('apotek_kasir_name') || 'Admin';
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
   const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
   
-  appData.cashflow.push({ type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: `Nota: ${notaId}`, time: timeStr, date: dateStr });
+  appData.cashflow.push({ type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: `Nota: ${notaId} (Kasir: ${kasirName})`, time: timeStr, date: dateStr });
 
-  cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId);
+  cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, kasirName);
 
   posCart = [];
   document.getElementById('pos_bayar').value = '';
@@ -595,7 +604,7 @@ function prosesTransaksiKasir() {
   alert(`✅ Transaksi ${notaId} Berhasil!`);
 }
 
-function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId) {
+function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, kasirName) {
   const frame = document.getElementById('printFrame');
   const doc = frame.contentWindow.document;
 
@@ -622,6 +631,7 @@ function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, not
         <div style="font-size: 10px;">Nota: ${notaId}</div>
         <div style="font-size: 10px;">Tgl: ${date} ${time}</div>
         <div style="font-size: 10px;">Metode: ${metode}</div>
+        <div style="font-size: 10px;">Kasir: ${kasirName}</div>
         <div class="line"></div>
         ${items.map(i => `
           <div style="font-size: 12px; font-weight: 900; margin-top: 3px;">${i.nama}</div>
