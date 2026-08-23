@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Kasir</title>
+  <title>Apotek Nugrah FARMA - Sistem Siap Operasional</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
@@ -76,8 +76,8 @@
     
     #mapContainer { 
       width: 100% !important; 
-      height: 380px !important; 
-      min-height: 380px !important;
+      height: 350px !important; 
+      min-height: 350px !important;
       border-radius: 10px; 
       margin-bottom: 15px; 
       border: 1.5px solid #e2e8f0; 
@@ -98,8 +98,8 @@
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Login Sistem Kasir</p>
-    <input type="text" id="emailInput" placeholder="Username / Email (Admin)">
+    <p>Login Sistem Kasir Siap Operasional</p>
+    <input type="text" id="emailInput" placeholder="Username / Email">
     <input type="password" id="passInput" placeholder="Password">
     <button onclick="doLogin()">MASUK SEKARANG</button>
     <p id="loginError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
@@ -112,7 +112,7 @@
     <div class="header-content">
       <div>
         <h1>Apotek Nugrah FARMA</h1>
-        <p>Sistem Kasir & Absensi Shift | WA: 0822-9037-3427</p>
+        <p>Kasir Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span> | WA: 0822-9037-3427</p>
       </div>
       <button onclick="doLogout()">Logout</button>
     </div>
@@ -167,15 +167,9 @@
 
     <!-- KASIR / POS -->
     <div id="kasir" class="tab">
-      <div class="card" style="background: #eef2ff; border-left: 4px solid #667eea; margin-bottom: 15px; padding: 12px 18px;">
-        <p style="font-size: 13px; font-weight: 600; color: #4338ca;">
-          ℹ️ Kasir Bertugas Saat Ini: <span id="activeKasirShiftDisplay" style="color: #b91c1c; font-weight: 800;">Belum ada yang Absen (Default: Admin)</span>
-        </p>
-      </div>
-
       <div class="grid-2">
         <div class="card">
-          <h3>💊 Pilih Obat / Alkes (Scan Barcode / Ketik)</h3>
+          <h3>💊 Pilih Produk / Alkes (Scan / Ketik)</h3>
           <div class="form-group" style="margin-bottom: 12px;">
             <label>Scan Barcode atau Ketik Nama Produk</label>
             <input type="text" id="pos_search_obat" placeholder="Scan barcode / ketik nama..." oninput="filterPosObatList()">
@@ -250,8 +244,8 @@
     <!-- INPUT STOK & ALKES -->
     <div id="barcode" class="tab">
       <div class="card">
-        <h3>📦 Input Stok Obat / Alkes (Bisa Tanpa Barcode)</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Jika produk tidak punya barcode (seperti Alkes/Racikan), ketik kode manual (misal: <b>ALK001</b>).</p>
+        <h3>📦 Input Stok Produk / Alkes (Bisa Tanpa Barcode)</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Jika produk tidak punya barcode (seperti Alkes), ketik kode manual (misal: <b>ALK001</b>).</p>
         
         <div class="form-grid">
           <div class="form-group">
@@ -305,7 +299,7 @@
     <!-- STOK KRITIS -->
     <div id="kritis" class="tab">
       <div class="card">
-        <h3>⚠️ Daftar Obat Stok Kritis (&lt; 20 Item)</h3>
+        <h3>⚠️ Daftar Produk Stok Kritis (&lt; 20 Item)</h3>
         <div id="kritisList">
           <p style="text-align: center; color: #999;">✅ Semua stok aman</p>
         </div>
@@ -349,13 +343,25 @@
         </div>
         <button class="btn-submit" onclick="catatAbsensi()">✋ Absen Masuk & Mulai Shift</button>
       </div>
+
+      <div class="card" style="margin-top: 20px;">
+        <h3>📋 Riwayat Rekap Absensi Tersimpan</h3>
+        <table>
+          <thead>
+            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Waktu Absen</th></tr>
+          </thead>
+          <tbody id="absensiHistoryTable">
+            <tr><td colspan="4" style="text-align: center;">Belum ada riwayat absensi</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- AKUN -->
     <div id="akun" class="tab">
       <div class="card">
         <h3>⚙️ Pengaturan Sistem</h3>
-        <p>Nama kasir pada struk diambil otomatis dari karyawan yang melakukan absensi shift hari ini.</p>
+        <p>Semua data (Stok, Transaksi, Cash Flow, dan Rekap Absensi) kini tersimpan permanen secara lokal di perangkat Anda.</p>
       </div>
     </div>
 
@@ -368,6 +374,20 @@
 let map = null;
 let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
+
+// Ambil data tersimpan dari LocalStorage (jika ada)
+let appData = {
+  cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
+  absensiList: JSON.parse(localStorage.getItem('apotek_absensi')) || [],
+  activeKasir: localStorage.getItem('apotek_active_kasir') || 'Belum Absen',
+  inventory: JSON.parse(localStorage.getItem('apotek_inventory')) || {
+    "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
+    "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
+    "ALK001": { nama: "Tensimeter Digital OneMed", qty: 15, harga: 250000, expired: "2030-01-01" }
+  }
+};
+
+let posCart = [];
 
 window.onload = function() {
   const role = localStorage.getItem('apotek_role');
@@ -399,20 +419,6 @@ function doLogout() {
   localStorage.removeItem('apotek_role');
   location.reload();
 }
-
-let appData = {
-  cashflow: [],
-  salesHistory: [],
-  absensiList: [],
-  activeKasir: null, // Menyimpan kasir yang sedang bertugas berdasarkan shift
-  inventory: {
-    "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
-    "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
-    "ALK001": { nama: "Tensimeter Digital OneMed", qty: 15, harga: 250000, expired: "2030-01-01" }
-  }
-};
-
-let posCart = [];
 
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('show'));
@@ -465,14 +471,14 @@ function catatAbsensi() {
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
 
-  // Set kasir aktif berdasarkan absensi shift terbaru
   appData.activeKasir = `${nama} (Shift ${shift})`;
   localStorage.setItem('apotek_active_kasir', appData.activeKasir);
 
   appData.absensiList.push({ nama, shift, waktu: `${dateStr} ${timeStr}` });
-  document.getElementById('todayAbsen').textContent = appData.absensiList.length;
-  
+  localStorage.setItem('apotek_absensi', JSON.stringify(appData.absensiList));
+
   loadActiveKasir();
+  updateAllDisplay();
   alert(`✅ Absensi berhasil! Kasir bertugas sekarang: ${appData.activeKasir}`);
   document.getElementById('abs_nama').value = '';
 }
@@ -601,14 +607,16 @@ function prosesTransaksiKasir() {
   posCart.forEach(item => {
     appData.inventory[item.kode].qty -= item.qty;
   });
+  localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
 
-  const kasirShift = localStorage.getItem('apotek_active_kasir') || 'Admin (Tanpa Absen Shift)';
+  const kasirShift = localStorage.getItem('apotek_active_kasir') || 'Admin';
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
   const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
   
   appData.cashflow.push({ type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: `Nota: ${notaId} | Kasir: ${kasirShift}`, time: timeStr, date: dateStr });
+  localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
 
   cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, kasirShift);
 
@@ -699,6 +707,7 @@ function simpanStokBarcode() {
   appData.inventory[kode].qty += (jenis === 'MASUK' ? qty : -qty);
   if (expired) appData.inventory[kode].expired = expired;
 
+  localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
   filterPosObatList();
   updateAllDisplay();
   alert('✅ Stok produk / alkes berhasil diperbarui!');
@@ -706,7 +715,41 @@ function simpanStokBarcode() {
 
 function updateAllDisplay() {
   const income = appData.cashflow.filter(c => c.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
+  const expense = appData.cashflow.filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
+  
   document.getElementById('dashIncome').textContent = 'Rp ' + income.toLocaleString('id-ID');
+  document.getElementById('dashExpense').textContent = 'Rp ' + expense.toLocaleString('id-ID');
+  document.getElementById('todayAbsen').textContent = appData.absensiList.length;
+
+  // Render Tabel Cashflow di Dashboard
+  const dashCashTable = document.getElementById('dashCashTable');
+  if (appData.cashflow.length === 0) {
+    dashCashTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>';
+  } else {
+    dashCashTable.innerHTML = appData.cashflow.slice(-5).reverse().map(c => `
+      <tr>
+        <td><span class="badge ${c.type === 'INCOME' ? 'badge-ok' : 'badge-danger'}">${c.type}</span></td>
+        <td>${c.source} (${c.desc})</td>
+        <td>Rp ${c.amount.toLocaleString('id-ID')}</td>
+        <td>${c.time}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Render Tabel Riwayat Absensi
+  const absenTable = document.getElementById('absensiHistoryTable');
+  if (appData.absensiList.length === 0) {
+    absenTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada riwayat absensi</td></tr>';
+  } else {
+    absenTable.innerHTML = appData.absensiList.map((a, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${a.nama}</td>
+        <td><b>Shift ${a.shift}</b></td>
+        <td>${a.waktu}</td>
+      </tr>
+    `).join('');
+  }
   
   let criticalArr = Object.entries(appData.inventory).filter(([k, v]) => v.qty < 20);
   document.getElementById('criticalCount').textContent = criticalArr.length;
@@ -721,7 +764,7 @@ function updateAllDisplay() {
       <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
       <td>${item.qty}</td>
       <td>${item.expired}</td>
-      <td><button class="btn-danger" onclick="delete appData.inventory['${kode}']; updateAllDisplay();">Hapus</button></td>
+      <td><button class="btn-danger" onclick="delete appData.inventory['${kode}']; localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory)); updateAllDisplay();">Hapus</button></td>
     </tr>
   `).join('');
 }
