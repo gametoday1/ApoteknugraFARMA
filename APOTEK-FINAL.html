@@ -761,7 +761,7 @@ function prosesTransaksiKasir() {
   alert(`✅ Transaksi ${notaId} Berhasil!`);
 }
 
-// FORMAT STRUK THERMAL DENGAN TINGGI OTOMATIS (AUTO-HEIGHT)
+// FORMAT STRUK THERMAL RATA KIRI (ALIGN LEFT) SUPAYA TIDAK KEPOTONG DI PINGGIR
 function cetakStrukKhusus(items, total, bayar, kembali, metode, time, date, notaId) {
   const frame = document.getElementById('printFrame');
   const doc = frame.contentWindow.document;
@@ -773,7 +773,7 @@ function cetakStrukKhusus(items, total, bayar, kembali, metode, time, date, nota
         <title>Struk - ${notaId}</title>
         <style>
           @page { size: 58mm auto; margin: 0; }
-          body { font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; width: 48mm; margin: 0 auto; padding: 2mm; color: #000; line-height: 1.2; -webkit-print-color-adjust: exact; }
+          body { font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; width: 48mm; margin: 0 auto; padding: 2mm; color: #000; line-height: 1.2; text-align: left; -webkit-print-color-adjust: exact; }
           .center { text-align: center; }
           .line { border-bottom: 2px solid #000; margin: 4px 0; }
           .flex { display: flex; justify-content: space-between; }
@@ -812,7 +812,7 @@ function cetakStrukKhusus(items, total, bayar, kembali, metode, time, date, nota
           <span>Rp ${kembali.toLocaleString('id-ID')}</span>
         </div>` : ''}
         <div class="line"></div>
-        <div class="center" style="font-size: 10px; margin-top: 4px;">
+        <div style="font-size: 10px; margin-top: 4px;">
           Terima Kasih Atas Kunjungan Anda<br><strong>Semoga Lekas Sembuh</strong>
         </div>
       </body>
