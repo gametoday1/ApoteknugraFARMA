@@ -56,8 +56,8 @@
     
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; }
+    .form-group input, .form-group select { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
     
     .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
     .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
@@ -97,7 +97,7 @@
 <!-- LOGIN PAGE -->
 <div id="loginPage" class="login-page">
   <div class="login-card">
-    <h1 id="loginApotekName">APOTEK NUGRAH FARMA</h1>
+    <h1>APOTEK NUGRAH FARMA</h1>
     <p>Login Sistem Kasir Siap Operasional</p>
     <input type="text" id="emailInput" placeholder="Username / Email">
     <input type="password" id="passInput" placeholder="Password">
@@ -111,8 +111,8 @@
   <div class="header">
     <div class="header-content">
       <div>
-        <h1 id="headerApotekName">Apotek Nugrah FARMA</h1>
-        <p>Kasir Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span> | WA: <span id="headerWaLabel">0822-9037-3427</span></p>
+        <h1>Apotek Nugrah FARMA</h1>
+        <p>Kasir Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span> | WA: 0822-9037-3427</p>
       </div>
       <button onclick="doLogout()">Logout</button>
     </div>
@@ -126,7 +126,7 @@
     <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis</button>
     <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
     <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi</button>
-    <button class="nav-btn" onclick="showTab('akun')">⚙️ Pengaturan & Owner</button>
+    <button class="nav-btn" onclick="showTab('akun')">⚙️ Pengaturan</button>
   </div>
   
   <div class="content">
@@ -382,29 +382,11 @@
     <!-- AKUN / PENGATURAN -->
     <div id="akun" class="tab">
       <div class="card">
-        <h3>⚙️ Pengaturan Profil Apotek & Owner</h3>
-        
-        <div class="form-grid" style="margin-bottom: 15px;">
-          <div class="form-group">
-            <label>Nama Apotek (Tampil di Struk & Header)</label>
-            <input type="text" id="settingApotekName" placeholder="Apotek Nugrah FARMA" oninput="saveSettings()">
-          </div>
-          <div class="form-group">
-            <label>Nomor WhatsApp Owner (Format: 628xxx)</label>
-            <input type="text" id="settingOwnerPhone" placeholder="6282290373427" oninput="saveSettings()">
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 20px;">
-          <label>Alamat & Kontak Apotek (Tampil di Struk Thermal)</label>
-          <textarea id="settingApotekAddress" rows="2" placeholder="Jl. Poros Kdi.- Moramo, Konawe Selatan" oninput="saveSettings()"></textarea>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-
-        <h3>🛡️ Manajemen Data Sistem</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Semua data transaksi, stok, dan absensi tersimpan aman di perangkat ini.</p>
-        <button class="btn-danger" style="padding: 10px 16px; font-size: 13px;" onclick="resetAllDataSystem()">⚠️ Reset Seluruh Data Pabrik</button>
+        <h3>⚙️ Informasi Sistem Apotek</h3>
+        <p style="font-size: 13px; color: #555; line-height: 1.6;">
+          Sistem Operasional Kasir & Absensi <b>Apotek Nugrah FARMA</b>.<br>
+          Semua data transaksi, stok produk, dan absensi karyawan tersimpan aman dan permanen di perangkat ini.
+        </p>
       </div>
     </div>
 
@@ -417,15 +399,15 @@
 let map = null;
 let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
+const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
+const FIXED_OWNER_PHONE = '6282290373427';
+const FIXED_APOTEK_ADDRESS = 'Jl. Poros Kdi.- Moramo, Konawe Selatan\\nWA: 0822-9037-3427';
 
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
   absensiList: JSON.parse(localStorage.getItem('apotek_absensi')) || [],
   salesCount: JSON.parse(localStorage.getItem('apotek_sales_count')) || {},
   activeKasir: localStorage.getItem('apotek_active_kasir') || 'Belum Absen',
-  ownerPhone: localStorage.getItem('apotek_owner_phone') || '6282290373427',
-  apotekName: localStorage.getItem('apotek_name') || 'Apotek Nugrah FARMA',
-  apotekAddress: localStorage.getItem('apotek_address') || 'Jl. Poros Kdi.- Moramo, Konawe Selatan\nWA: 0822-9037-3427',
   inventory: JSON.parse(localStorage.getItem('apotek_inventory')) || {
     "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
     "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
@@ -444,31 +426,8 @@ window.onload = function() {
     filterPosObatList();
     updateAllDisplay();
   }
-  loadSettingsUI();
-};
-
-function loadSettingsUI() {
-  document.getElementById('settingApotekName').value = appData.apotekName;
-  document.getElementById('settingOwnerPhone').value = appData.ownerPhone;
-  document.getElementById('settingApotekAddress').value = appData.apotekAddress;
-  
-  document.getElementById('loginApotekName').textContent = appData.apotekName;
-  document.getElementById('headerApotekName').textContent = appData.apotekName;
-  document.getElementById('headerWaLabel').textContent = appData.ownerPhone;
-}
-
-function saveSettings() {
-  appData.apotekName = document.getElementById('settingApotekName').value.trim() || 'Apotek Nugrah FARMA';
-  appData.ownerPhone = document.getElementById('settingOwnerPhone').value.trim() || '6282290373427';
-  appData.apotekAddress = document.getElementById('settingApotekAddress').value.trim() || 'Jl. Poros Kdi.- Moramo, Konawe Selatan';
-
-  localStorage.setItem('apotek_name', appData.apotekName);
-  localStorage.setItem('apotek_owner_phone', appData.ownerPhone);
-  localStorage.setItem('apotek_address', appData.apotekAddress);
-
-  loadSettingsUI();
   generateWaReportLink();
-}
+};
 
 function doLogin() {
   const email = document.getElementById('emailInput').value.trim();
@@ -568,7 +527,7 @@ function generateWaReportLink() {
   const expense = appData.cashflow.filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
   const totalAbsen = appData.absensiList.length;
 
-  let text = `*LAPORAN HARIAN ${appData.apotekName}*%0A`;
+  let text = `*LAPORAN HARIAN ${FIXED_APOTEK_NAME}*%0A`;
   text += `-----------------------------------%0A`;
   text += `💰 Total Pemasukan: Rp ${income.toLocaleString('id-ID')}%0A`;
   text += `💸 Total Pengeluaran: Rp ${expense.toLocaleString('id-ID')}%0A`;
@@ -576,7 +535,7 @@ function generateWaReportLink() {
   text += `-----------------------------------%0A`;
   text += `_Dikirim otomatis dari Sistem Kasir Web._`;
 
-  const waUrl = `https://api.whatsapp.com/send?phone=${appData.ownerPhone}&text=${text}`;
+  const waUrl = `https://api.whatsapp.com/send?phone=${FIXED_OWNER_PHONE}&text=${text}`;
   const btn = document.getElementById('btnKirimWaOwner');
   if (btn) btn.href = waUrl;
 }
@@ -637,7 +596,7 @@ function toggleMetodePembayaran() {
   } else {
     containerCash.style.display = 'none';
     containerQris.style.display = 'block';
-    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${appData.apotekName}-${total}`;
+    document.getElementById('qrisImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${FIXED_APOTEK_NAME}-${total}`;
     document.getElementById('qrisNominal').textContent = 'Rp ' + total.toLocaleString('id-ID');
   }
 }
@@ -743,8 +702,8 @@ function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, not
       </head>
       <body>
         <div class="center">
-          <h3>${appData.apotekName}</h3>
-          <div style="font-size: 10px; white-space: pre-line;">${appData.apotekAddress}</div>
+          <h3>${FIXED_APOTEK_NAME}</h3>
+          <div style="font-size: 10px;">Jl. Poros Kdi.- Moramo, Konawe Selatan<br>WA: 0822-9037-3427</div>
         </div>
         <div class="line"></div>
         <div style="font-size: 10px;">Nota: ${notaId}</div>
@@ -807,13 +766,6 @@ function simpanStokBarcode() {
   filterPosObatList();
   updateAllDisplay();
   alert('✅ Stok produk / alkes berhasil diperbarui!');
-}
-
-function resetAllDataSystem() {
-  if (confirm('⚠️ Yakin ingin mereset seluruh data (stok, transaksi, dan absensi)?')) {
-    localStorage.clear();
-    location.reload();
-  }
 }
 
 function updateAllDisplay() {
