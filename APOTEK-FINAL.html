@@ -450,7 +450,7 @@ let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
 const FIXED_OWNER_PHONE = '6282290373427';
-const OWNER_ADMIN_PIN = '7777'; // PIN rahasia khusus Owner
+const OWNER_ADMIN_PIN = '426022'; // PIN rahasia khusus Owner yang baru
 
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
@@ -485,7 +485,7 @@ function toggleLoginPinField() {
   if (role === 'kasir') {
     pinInput.placeholder = 'Masukkan Nama Kasir / PIN Kasir';
   } else {
-    pinInput.placeholder = 'Masukkan PIN Rahasia Owner (Default: 7777)';
+    pinInput.placeholder = 'Masukkan PIN Rahasia Owner (426022)';
   }
 }
 
@@ -494,7 +494,7 @@ function doLogin() {
   const pin = document.getElementById('passInput').value.trim();
 
   if (role === 'admin' && pin !== OWNER_ADMIN_PIN) {
-    return document.getElementById('loginError').textContent = "❌ PIN Owner salah! (Default: 7777)";
+    return document.getElementById('loginError').textContent = "❌ PIN Owner salah! (Gunakan: 426022)";
   }
   if (role === 'kasir' && pin.length < 2) {
     return document.getElementById('loginError').textContent = "❌ Masukkan nama kasir yang bertugas!";
@@ -592,7 +592,6 @@ function catatAbsensi(statusAbsen) {
     appData.activeKasir = `${nama} (Shift ${shift})`;
     localStorage.setItem('apotek_active_kasir', appData.activeKasir);
     
-    // Catat modal awal ke cashflow sebagai referensi kasir
     if (modalAwal > 0) {
       appData.cashflow.push({
         type: 'INCOME',
