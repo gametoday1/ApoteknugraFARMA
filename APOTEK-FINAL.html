@@ -450,7 +450,7 @@ let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
 const FIXED_OWNER_PHONE = '6282290373427';
-const OWNER_ADMIN_PIN = '426022'; // PIN rahasia khusus Owner yang baru
+const OWNER_ADMIN_PIN = '426022'; // PIN rahasia khusus Owner
 
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
@@ -820,11 +820,12 @@ function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, not
       <body>
         <div class="center">
           <h3>💊 ${FIXED_APOTEK_NAME}</h3>
+          <div style="font-size: 9px;">SIA: 503/123/SIA/V/2026</div>
           <div style="font-size: 10px;">Jl. Poros Kdi.- Moramo, Konawe Selatan<br>WA: 0822-9037-3427</div>
         </div>
         <div class="line"></div>
         <div style="font-size: 10px;">Nota: ${notaId}</div>
-        <div style="font-size: 10px;">Tgl: ${date} ${time}</div>
+        <div style="font-size: 10px;">Tanggal: ${date} ${time}</div>
         <div style="font-size: 10px;">Metode: ${metode}</div>
         <div style="font-size: 10px;">Kasir: ${operator}</div>
         ${pasien || dokter ? `<div style="font-size: 10px; margin-top:2px;">Pasien: ${pasien || '-'}<br>Dokter: ${dokter || '-'}</div>` : ''}
