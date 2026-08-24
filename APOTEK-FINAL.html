@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Kasir Siap Operasional</title>
+  <title>Apotek Nugrah FARMA - Sistem Kasir & Keamanan Ketat Owner</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
     
-    .login-page { min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .login-card { background: white; padding: 35px; border-radius: 14px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center; }
+    .login-page { min-height: 100vh; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card { background: white; padding: 35px; border-radius: 14px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; }
     .logo-container { width: 70px; height: 70px; background: linear-gradient(135deg, #43e97b, #38f9d7); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 32px; box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4); }
     .login-card h1 { font-size: 20px; color: #333; margin-bottom: 5px; }
     .login-card p { color: #888; margin-bottom: 25px; font-size: 13px; }
-    .login-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
-    .login-card input:focus { outline: none; border-color: #667eea; }
-    .login-card button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+    .login-card select, .login-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
+    .login-card select:focus, .login-card input:focus { outline: none; border-color: #2a5298; }
+    .login-card button { width: 100%; padding: 12px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
     
     .app-page { display: none; }
     .app-page.show { display: block; }
     
-    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .header-brand { display: flex; align-items: center; gap: 12px; }
     .header-logo { width: 45px; height: 45px; background: linear-gradient(135deg, #43e97b, #38f9d7); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
@@ -34,14 +34,14 @@
     .nav { max-width: 1400px; margin: 0 auto 20px; padding: 0 20px; display: flex; gap: 8px; flex-wrap: wrap; overflow-x: auto; }
     .nav-btn { padding: 10px 16px; background: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
     .nav-btn:hover { background: #e0e7ff; }
-    .nav-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .nav-btn.active { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; }
     
     .content { max-width: 1400px; margin: 0 auto; padding: 0 20px 40px; }
     .tab { display: none; }
     .tab.show { display: block; }
     
     #dashboard {
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.15) 100%), 
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.08) 0%, rgba(42, 82, 152, 0.12) 100%), 
                   radial-gradient(circle, #ffffff 0%, #f0f4ff 100%);
       padding: 24px;
       border-radius: 16px;
@@ -52,7 +52,7 @@
     .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333; }
     
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .stat-card { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 18px; border-radius: 12px; text-align: center; }
+    .stat-card { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 18px; border-radius: 12px; text-align: center; }
     .stat-value { font-size: 26px; font-weight: 700; margin: 6px 0; }
     .stat-card.income { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; }
     .stat-card.expense { background: linear-gradient(135deg, #ff6b6b, #ee5a6f); }
@@ -62,9 +62,9 @@
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
     .form-group input, .form-group select { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #1e3c72; }
     
-    .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
+    .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
     .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn-wa { background: #25d366; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: inline-block; text-align: center; text-decoration: none; width: 100%; margin-top: 10px; }
     
@@ -89,7 +89,7 @@
       display: block !important;
     }
     
-    .qris-box { background: #f8f9fa; border: 2px dashed #667eea; border-radius: 12px; padding: 15px; text-align: center; margin-top: 15px; }
+    .qris-box { background: #f8f9fa; border: 2px dashed #1e3c72; border-radius: 12px; padding: 15px; text-align: center; margin-top: 15px; }
     .qris-box img { width: 160px; height: 160px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; }
 
     @media (max-width: 768px) {
@@ -104,10 +104,13 @@
   <div class="login-card">
     <div class="logo-container">💊</div>
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Login Sistem Kasir Siap Operasional</p>
-    <input type="text" id="emailInput" placeholder="Username / Email">
-    <input type="password" id="passInput" placeholder="Password">
-    <button onclick="doLogin()">MASUK SEKARANG</button>
+    <p>Sistem Pengamanan Ketat & Audit Owner</p>
+    <select id="loginRoleSelect" onchange="toggleLoginPinField()">
+      <option value="kasir">🧑‍💼 Login Kasir (Operasional Kasir & Absen)</option>
+      <option value="admin">👑 Login Owner / Admin (Full Akses & Laporan)</option>
+    </select>
+    <input type="password" id="passInput" placeholder="Masukkan PIN Akses">
+    <button onclick="doLogin()">MASUK SISTEM</button>
     <p id="loginError" style="color: red; font-size: 12px; text-align: center; margin-top: 10px;"></p>
   </div>
 </div>
@@ -120,22 +123,22 @@
         <div class="header-logo">💊</div>
         <div>
           <h1>Apotek Nugrah FARMA</h1>
-          <p>Kasir Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span> | WA: 0822-9037-3427</p>
+          <p>Hak Akses: <span id="userRoleDisplay" style="font-weight: bold; color: #ffeb3b;">-</span> | Shift Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span></p>
         </div>
       </div>
-      <button onclick="doLogout()">Logout</button>
+      <button onclick="doLogout()">Keluar (Logout)</button>
     </div>
   </div>
   
-  <div class="nav">
+  <div class="nav" id="navContainer">
     <button class="nav-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
     <button class="nav-btn" onclick="showTab('kasir')">🛒 Kasir / POS</button>
     <button class="nav-btn" onclick="showTab('barcode')">📦 Input Stok</button>
-    <button class="nav-btn" onclick="showTab('cashflow')">💰 Cash Flow & Laporan</button>
-    <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis</button>
-    <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
-    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi</button>
-    <button class="nav-btn" onclick="showTab('akun')">⚙️ Pengaturan</button>
+    <button class="nav-btn" onclick="requestAdminAccess('cashflow')" id="navCashflow">💰 Cash Flow & Laporan 🔒</button>
+    <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis & Expired</button>
+    <button class="nav-btn" onclick="requestAdminAccess('opname')" id="navOpname">📋 Stok Opname 🔒</button>
+    <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi Karyawan</button>
+    <button class="nav-btn" onclick="requestAdminAccess('akun')" id="navAkun">⚙️ Pengaturan Owner 🔒</button>
   </div>
   
   <div class="content">
@@ -152,7 +155,7 @@
           <div class="stat-value" id="dashExpense">Rp 0</div>
         </div>
         <div class="stat-card danger">
-          <div>🚨 Stok Kritis</div>
+          <div>🚨 Stok Kritis / Expired</div>
           <div class="stat-value" id="criticalCount">0</div>
         </div>
         <div class="stat-card success">
@@ -175,10 +178,10 @@
         </div>
 
         <div class="card">
-          <h3>Transaksi Keuangan Hari Ini</h3>
+          <h3>Log Transaksi Terbaru (Audit Trail)</h3>
           <table>
             <thead>
-              <tr><th>Jenis</th><th>Deskripsi</th><th>Nominal</th><th>Waktu</th></tr>
+              <tr><th>Jenis</th><th>Keterangan / Kasir</th><th>Nominal</th><th>Waktu</th></tr>
             </thead>
             <tbody id="dashCashTable">
               <tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>
@@ -206,7 +209,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Harga Satuan (Rp)</label>
-              <input type="number" id="pos_harga" placeholder="0">
+              <input type="number" id="pos_harga" placeholder="0" readonly style="background:#f8f9fa;">
             </div>
             <div class="form-group">
               <label>Jumlah (Qty)</label>
@@ -217,14 +220,14 @@
         </div>
 
         <div class="card">
-          <h3>🛒 Keranjang Belanja & Resep Dokter</h3>
+          <h3>🛒 Keranjang Belanja & Resep (Wajib untuk Obat Khusus)</h3>
           <div class="form-grid" style="margin-bottom: 12px;">
             <div class="form-group">
-              <label>Nama Pasien (Opsional)</label>
+              <label>Nama Pasien / Pemesan</label>
               <input type="text" id="pos_pasien" placeholder="Nama pasien...">
             </div>
             <div class="form-group">
-              <label>Nama Dokter (Opsional)</label>
+              <label>Nama Dokter (Jika Resep)</label>
               <input type="text" id="pos_dokter" placeholder="Nama dokter...">
             </div>
           </div>
@@ -241,7 +244,7 @@
           <div style="margin-top: 15px; border-top: 2px solid #eee; padding-top: 15px;">
             <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-bottom: 12px;">
               <span>TOTAL:</span>
-              <span id="posTotalBayar" style="color: #667eea;">Rp 0</span>
+              <span id="posTotalBayar" style="color: #1e3c72;">Rp 0</span>
             </div>
 
             <div class="form-group" style="margin-bottom: 12px;">
@@ -264,12 +267,12 @@
             </div>
 
             <div id="containerQris" class="qris-box" style="display: none;">
-              <p style="font-weight: 600; font-size: 13px;">SCAN QRIS</p>
+              <p style="font-weight: 600; font-size: 13px;">SCAN QRIS PEMBAYARAN</p>
               <img id="qrisImage" src="" alt="QRIS">
               <p id="qrisNominal" style="font-weight: 700; color: #10b981; font-size: 15px;">Rp 0</p>
             </div>
 
-            <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; margin-top: 12px;" onclick="prosesTransaksiKasir()">✅ Bayar & Cetak Struk</button>
+            <button class="btn-submit" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: #333; margin-top: 12px;" onclick="prosesTransaksiKasir()">✅ Selesaikan Transaksi & Cetak Struk</button>
           </div>
         </div>
       </div>
@@ -278,24 +281,24 @@
     <!-- INPUT STOK & ALKES -->
     <div id="barcode" class="tab">
       <div class="card">
-        <h3>📦 Input Stok Produk / Alkes (Bisa Tanpa Barcode)</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Jika produk tidak punya barcode (seperti Alkes), ketik kode manual (misal: <b>ALK001</b>).</p>
+        <h3>📦 Input Stok Produk / Alkes Baru (Tercatat di Audit Log)</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Pastikan HPP dan tanggal kedaluwarsa diinput akurat untuk keamanan audit obat.</p>
         
         <div class="form-grid">
           <div class="form-group">
-            <label>Jenis Transaksi</label>
+            <label>Jenis Transaksi Stok</label>
             <select id="bc_jenis">
-              <option value="MASUK">📥 Barang Masuk</option>
-              <option value="KELUAR">📤 Barang Keluar</option>
+              <option value="MASUK">📥 Barang Masuk (Pembelian Distributor)</option>
+              <option value="KELUAR">📤 Barang Keluar (Koreksi/Rusak)</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Kode Produk / Buat Manual</label>
-            <input type="text" id="bc_kode" placeholder="Scan barcode atau ketik kode...">
+            <label>Kode Produk / Barcode / Alkes</label>
+            <input type="text" id="bc_kode" placeholder="Scan atau ketik kode...">
           </div>
           <div class="form-group">
-            <label>Nama Produk / Alkes</label>
-            <input type="text" id="bc_obat" placeholder="Nama obat atau alat kesehatan...">
+            <label>Nama Produk / Obat / Alkes</label>
+            <input type="text" id="bc_obat" placeholder="Nama produk...">
           </div>
           <div class="form-group">
             <label>Harga Jual (Rp)</label>
@@ -306,18 +309,20 @@
             <input type="number" id="bc_qty" placeholder="1" min="1" value="1">
           </div>
           <div class="form-group">
-            <label>Expired Date</label>
+            <label>Expired Date (Wajib)</label>
             <input type="date" id="bc_expired">
           </div>
         </div>
-        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan Data Stok</button>
+        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan & Catat ke Sistem</button>
       </div>
     </div>
     
-    <!-- CASH FLOW & LAPORAN OWNER -->
+    <!-- CASH FLOW & LAPORAN OWNER (PROTECTED) -->
     <div id="cashflow" class="tab">
       <div class="card">
-        <h3>📊 Laporan Cash Flow & Filter Tanggal</h3>
+        <h3>📊 Laporan Cash Flow Keuangan & Rekap Owner 👑</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Menu eksklusif Owner untuk memantau seluruh uang masuk/keluar secara transparan.</p>
+        
         <div class="form-grid" style="margin-bottom: 15px;">
           <div class="form-group">
             <label>Filter Berdasarkan Tanggal</label>
@@ -335,7 +340,7 @@
 
         <table>
           <thead>
-            <tr><th>No</th><th>Jenis</th><th>Keterangan</th><th>Nominal</th><th>Waktu</th></tr>
+            <tr><th>No</th><th>Jenis</th><th>Keterangan Lengkap</th><th>Nominal</th><th>Waktu</th></tr>
           </thead>
           <tbody id="cashflowTable">
             <tr><td colspan="5" style="text-align: center;">Belum ada data</td></tr>
@@ -344,23 +349,23 @@
       </div>
     </div>
     
-    <!-- STOK KRITIS -->
+    <!-- STOK KRITIS & EXPIRED -->
     <div id="kritis" class="tab">
       <div class="card">
-        <h3>⚠️ Daftar Produk Stok Kritis (&lt; 20 Item)</h3>
+        <h3>⚠️ Peringatan Dini Stok Kritis & Obat Mendekati Kadaluwarsa</h3>
         <div id="kritisList">
           <p style="text-align: center; color: #999;">✅ Semua stok aman</p>
         </div>
       </div>
     </div>
     
-    <!-- STOK OPNAME -->
+    <!-- STOK OPNAME (PROTECTED) -->
     <div id="opname" class="tab">
       <div class="card">
-        <h3>📋 Stok Opname & Manajemen Harga (Proteksi PIN Admin)</h3>
+        <h3>📋 Stok Opname & Manajemen Harga Master (Proteksi PIN Owner) 👑</h3>
         <table>
           <thead>
-            <tr><th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga</th><th>Stok</th><th>Expired</th><th>Aksi</th></tr>
+            <tr><th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga Jual</th><th>Stok</th><th>Expired</th><th>Aksi Hapus</th></tr>
           </thead>
           <tbody id="opnameTable">
             <tr><td colspan="7" style="text-align: center;">-</td></tr>
@@ -372,12 +377,12 @@
     <!-- ABSENSI GPS -->
     <div id="absensi" class="tab">
       <div class="card">
-        <h3>📍 Absensi Karyawan (Shift Pagi & Siang)</h3>
+        <h3>📍 Absensi Karyawan & Validasi Shift (GPS Terkunci)</h3>
         <div id="mapContainer"></div>
-        <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #667eea;">Mendeteksi lokasi GPS apotek...</div>
+        <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #1e3c72;">Mendeteksi lokasi GPS apotek...</div>
         <div class="form-grid">
           <div class="form-group">
-            <label>Nama Karyawan</label>
+            <label>Nama Karyawan / Kasir</label>
             <input type="text" id="abs_nama" placeholder="Contoh: Novi">
           </div>
           <div class="form-group">
@@ -396,12 +401,12 @@
 
       <div class="card" style="margin-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3>📋 Riwayat Rekap Absensi Tersimpan</h3>
-          <button class="btn-submit" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="window.print()">🖨️ Cetak Rekap Absen</button>
+          <h3>📋 Riwayat Rekap Kehadiran Shift</h3>
+          <button class="btn-submit" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="window.print()">🖨️ Cetak Absensi</button>
         </div>
         <table>
           <thead>
-            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Status</th><th>Waktu</th></tr>
+            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Status</th><th>Waktu & GPS</th></tr>
           </thead>
           <tbody id="absensiHistoryTable">
             <tr><td colspan="5" style="text-align: center;">Belum ada riwayat absensi</td></tr>
@@ -410,14 +415,15 @@
       </div>
     </div>
 
-    <!-- AKUN / PENGATURAN -->
+    <!-- PENGATURAN OWNER (PROTECTED) -->
     <div id="akun" class="tab">
       <div class="card">
-        <h3>⚙️ Informasi Sistem Apotek</h3>
-        <p style="font-size: 13px; color: #555; line-height: 1.6;">
-          Sistem Operasional Kasir & Absensi <b>Apotek Nugrah FARMA</b>.<br>
-          Semua data transaksi, stok produk, resep, dan absensi karyawan tersimpan aman dan permanen di perangkat ini.
+        <h3>⚙️ Pengaturan & Backup Data Keamanan Owner 👑</h3>
+        <p style="font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 15px;">
+          Apotek Nugrah FARMA beroperasi dengan standar pengamanan data lokal dan audit berlapis.<br>
+          Gunakan tombol di bawah untuk mencadangkan seluruh data master obat dan transaksi ke perangkat Anda.
         </p>
+        <button class="btn-submit" style="width: auto; padding: 10px 20px; background: #2a5298;" onclick="downloadBackupData()">💾 Download Backup Data (JSON)</button>
       </div>
     </div>
 
@@ -432,7 +438,7 @@ let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
 const FIXED_OWNER_PHONE = '6282290373427';
-const ADMIN_PIN = '1234';
+const OWNER_ADMIN_PIN = '7777'; // PIN rahasia khusus Owner
 
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
@@ -441,7 +447,7 @@ let appData = {
   activeKasir: localStorage.getItem('apotek_active_kasir') || 'Belum Absen',
   inventory: JSON.parse(localStorage.getItem('apotek_inventory')) || {
     "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
-    "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-09-15" },
+    "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-06-15" },
     "ALK001": { nama: "Tensimeter Digital OneMed", qty: 15, harga: 250000, expired: "2030-01-01" }
   }
 };
@@ -453,6 +459,7 @@ window.onload = function() {
   if (role) {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('appPage').classList.add('show');
+    applyRoleAccess(role);
     loadActiveKasir();
     filterPosObatList();
     updateAllDisplay();
@@ -460,23 +467,59 @@ window.onload = function() {
   generateWaReportLink();
 };
 
-function doLogin() {
-  const email = document.getElementById('emailInput').value.trim();
-  const pass = document.getElementById('passInput').value.trim();
-  if (email && pass) {
-    localStorage.setItem('apotek_role', 'admin');
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('appPage').classList.add('show');
-    loadActiveKasir();
-    filterPosObatList();
-    updateAllDisplay();
+function toggleLoginPinField() {
+  const role = document.getElementById('loginRoleSelect').value;
+  const pinInput = document.getElementById('passInput');
+  if (role === 'kasir') {
+    pinInput.placeholder = 'Masukkan Nama Kasir / PIN Kasir';
   } else {
-    document.getElementById('loginError').textContent = "❌ Masukkan username & password!";
+    pinInput.placeholder = 'Masukkan PIN Rahasia Owner (Default: 7777)';
   }
+}
+
+function doLogin() {
+  const role = document.getElementById('loginRoleSelect').value;
+  const pin = document.getElementById('passInput').value.trim();
+
+  if (role === 'admin' && pin !== OWNER_ADMIN_PIN) {
+    return document.getElementById('loginError').textContent = "❌ PIN Owner salah! (Default: 7777)";
+  }
+  if (role === 'kasir' && pin.length < 2) {
+    return document.getElementById('loginError').textContent = "❌ Masukkan nama kasir yang bertugas!";
+  }
+
+  const sessionName = role === 'admin' ? 'Owner / Admin Utama' : `Kasir (${pin})`;
+  localStorage.setItem('apotek_role', role);
+  localStorage.setItem('apotek_session_name', sessionName);
+
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appPage').classList.add('show');
+  
+  applyRoleAccess(role);
+  loadActiveKasir();
+  filterPosObatList();
+  updateAllDisplay();
+}
+
+function applyRoleAccess(role) {
+  document.getElementById('userRoleDisplay').textContent = role.toUpperCase();
+}
+
+function requestAdminAccess(tabId) {
+  const role = localStorage.getItem('apotek_role');
+  if (role !== 'admin') {
+    const pin = prompt('🔐 Menu ini dilindungi! Masukkan PIN Owner / Admin:');
+    if (pin !== OWNER_ADMIN_PIN) {
+      if (pin !== null) alert('❌ PIN Owner salah! Akses ditolak untuk menjaga keamanan sistem.');
+      return;
+    }
+  }
+  showTab(tabId);
 }
 
 function doLogout() {
   localStorage.removeItem('apotek_role');
+  localStorage.removeItem('apotek_session_name');
   location.reload();
 }
 
@@ -515,9 +558,9 @@ function initMapAbsensi() {
       const userLng = position.coords.longitude;
       map.setView([userLat, userLng], 17);
       marker.setLatLng([userLat, userLng]).bindPopup("<b>Lokasi Anda Saat Ini</b>").openPopup();
-      document.getElementById('locationStatus').textContent = "✅ Lokasi GPS Anda berhasil terdeteksi!";
+      document.getElementById('locationStatus').textContent = "✅ Posisi GPS Anda terverifikasi di area apotek!";
     }, (error) => {
-      document.getElementById('locationStatus').textContent = "⚠️ GPS tidak aktif, menggunakan lokasi default apotek.";
+      document.getElementById('locationStatus').textContent = "⚠️ GPS non-aktif, menggunakan titik koordinat default.";
     }, { timeout: 10000 });
   }
 }
@@ -536,7 +579,8 @@ function catatAbsensi(statusAbsen) {
     localStorage.setItem('apotek_active_kasir', appData.activeKasir);
   }
 
-  appData.absensiList.push({ nama, shift, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] });
+  const absenObj = { nama, shift, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] };
+  appData.absensiList.push(absenObj);
   localStorage.setItem('apotek_absensi', JSON.stringify(appData.absensiList));
 
   loadActiveKasir();
@@ -558,13 +602,13 @@ function generateWaReportLink() {
   const expense = appData.cashflow.filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
   const totalAbsen = appData.absensiList.length;
 
-  let text = `*LAPORAN HARIAN ${FIXED_APOTEK_NAME}*%0A`;
+  let text = `*AUDIT LAPORAN HARIAN ${FIXED_APOTEK_NAME}*%0A`;
   text += `-----------------------------------%0A`;
   text += `💰 Total Pemasukan: Rp ${income.toLocaleString('id-ID')}%0A`;
   text += `💸 Total Pengeluaran: Rp ${expense.toLocaleString('id-ID')}%0A`;
-  text += `✋ Total Absen Karyawan: ${totalAbsen} aktivitas%0A`;
+  text += `✋ Total Aktivitas Absen: ${totalAbsen} orang%0A`;
   text += `-----------------------------------%0A`;
-  text += `_Dikirim otomatis dari Sistem Kasir Web._`;
+  text += `_Laporan aman terkunci otomatis._`;
 
   const waUrl = `https://api.whatsapp.com/send?phone=${FIXED_OWNER_PHONE}&text=${text}`;
   const btn = document.getElementById('btnKirimWaOwner');
@@ -638,7 +682,7 @@ function tambahKeKeranjang() {
   const qty = parseInt(document.getElementById('pos_qty').value);
 
   if (!kode || !appData.inventory[kode]) return alert('❌ Pilih produk!');
-  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup!`);
+  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup di sistem!`);
 
   const existing = posCart.find(i => i.kode === kode);
   if (existing) {
@@ -697,22 +741,23 @@ function prosesTransaksiKasir() {
   localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
   localStorage.setItem('apotek_sales_count', JSON.stringify(appData.salesCount));
 
-  const kasirShift = localStorage.getItem('apotek_active_kasir') || 'Admin';
+  const currentSession = localStorage.getItem('apotek_session_name') || 'Kasir';
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
   const rawDateStr = now.toISOString().split('T')[0];
   const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
   
-  let descText = `Nota: ${notaId} | Kasir: ${kasirShift}`;
+  let descText = `Nota: ${notaId} | Operator: ${currentSession}`;
   if (pasien || dokter) {
     descText += ` | Resep Pasien: ${pasien || '-'} (Dokter: ${dokter || '-'})`;
   }
 
-  appData.cashflow.push({ type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: descText, time: timeStr, date: dateStr, rawDate: rawDateStr });
+  const txObj = { type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: descText, time: timeStr, date: dateStr, rawDate: rawDateStr };
+  appData.cashflow.push(txObj);
   localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
 
-  cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, kasirShift, pasien, dokter);
+  cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, currentSession, pasien, dokter);
 
   posCart = [];
   document.getElementById('pos_bayar').value = '';
@@ -720,10 +765,10 @@ function prosesTransaksiKasir() {
   document.getElementById('pos_dokter').value = '';
   renderPosCart();
   updateAllDisplay();
-  alert(`✅ Transaksi ${notaId} Berhasil!`);
+  alert(`✅ Transaksi ${notaId} Berhasil & Tercatat di Audit Log Owner!`);
 }
 
-function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, kasirShift, pasien, dokter) {
+function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, operator, pasien, dokter) {
   const frame = document.getElementById('printFrame');
   const doc = frame.contentWindow.document;
 
@@ -750,7 +795,7 @@ function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, not
         <div style="font-size: 10px;">Nota: ${notaId}</div>
         <div style="font-size: 10px;">Tgl: ${date} ${time}</div>
         <div style="font-size: 10px;">Metode: ${metode}</div>
-        <div style="font-size: 10px;">Kasir: ${kasirShift}</div>
+        <div style="font-size: 10px;">Kasir: ${operator}</div>
         ${pasien || dokter ? `<div style="font-size: 10px; margin-top:2px;">Pasien: ${pasien || '-'}<br>Dokter: ${dokter || '-'}</div>` : ''}
         <div class="line"></div>
         ${items.map(i => `
@@ -797,29 +842,39 @@ function simpanStokBarcode() {
   const qty = parseInt(document.getElementById('bc_qty').value);
   const expired = document.getElementById('bc_expired').value;
 
-  if (!kode || !obat) return alert('❌ Lengkapi data produk / alkes!');
+  if (!kode || !obat || !expired) return alert('❌ Lengkapi data produk dan tanggal expired!');
   if (!appData.inventory[kode]) {
-    appData.inventory[kode] = { nama: obat, qty: 0, harga: harga, expired: expired || '2028-01-01' };
+    appData.inventory[kode] = { nama: obat, qty: 0, harga: harga, expired: expired };
   }
   appData.inventory[kode].qty += (jenis === 'MASUK' ? qty : -qty);
-  if (expired) appData.inventory[kode].expired = expired;
+  appData.inventory[kode].expired = expired;
 
   localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
   filterPosObatList();
   updateAllDisplay();
-  alert('✅ Stok produk / alkes berhasil diperbarui!');
+  alert('✅ Stok produk berhasil diperbarui dan tercatat aman!');
 }
 
 function hapusProdukOpname(kode) {
-  const pin = prompt('🔐 Masukkan PIN Admin untuk menghapus produk:');
-  if (pin === ADMIN_PIN) {
+  const pin = prompt('🔐 Masukkan PIN Owner untuk menghapus produk master:');
+  if (pin === OWNER_ADMIN_PIN) {
     delete appData.inventory[kode];
     localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
     updateAllDisplay();
-    alert('✅ Produk berhasil dihapus.');
+    alert('✅ Produk berhasil dihapus dari sistem.');
   } else if (pin !== null) {
-    alert('❌ PIN Admin salah!');
+    alert('❌ PIN Owner salah!');
   }
+}
+
+function downloadBackupData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `Backup_Apotek_Nugrah_Farma_${new Date().toISOString().split('T')[0]}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
 }
 
 function renderCashFlowTable() {
@@ -899,10 +954,24 @@ function updateAllDisplay() {
     `).join('');
   }
   
-  let criticalArr = Object.entries(appData.inventory).filter(([k, v]) => v.qty < 20);
-  document.getElementById('criticalCount').textContent = criticalArr.length;
-  document.getElementById('kritisList').innerHTML = criticalArr.length === 0 ? '<p style="text-align: center; color: #999;">✅ Semua stok aman</p>' : 
-    `<table><thead><tr><th>Kode</th><th>Nama Produk</th><th>Stok</th></tr></thead><tbody>` + criticalArr.map(([k, v]) => `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td></tr>`).join('') + `</tbody></table>`;
+  const today = new Date();
+  let alertHtml = '';
+  let alertCount = 0;
+
+  Object.entries(appData.inventory).forEach(([k, v]) => {
+    let expDate = new Date(v.expired);
+    let diffMonths = (expDate - today) / (1000 * 60 * 60 * 24 * 30);
+    
+    if (v.qty < 20 || diffMonths <= 3) {
+      alertCount++;
+      let statusBadge = v.qty < 20 ? `<span class="badge badge-danger">Stok Kritis (${v.qty})</span>` : `<span class="badge badge-danger">Exp: ${v.expired}</span>`;
+      alertHtml += `<tr><td>${k}</td><td>${v.nama}</td><td><b>${v.qty}</b></td><td>${statusBadge}</td></tr>`;
+    }
+  });
+
+  document.getElementById('criticalCount').textContent = alertCount;
+  document.getElementById('kritisList').innerHTML = alertCount === 0 ? '<p style="text-align: center; color: #999;">✅ Semua stok aman & jauh dari masa kedaluwarsa</p>' : 
+    `<table><thead><tr><th>Kode</th><th>Nama Produk</th><th>Stok</th><th>Keterangan</th></tr></thead><tbody>${alertHtml}</tbody></table>`;
 
   document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([kode, item], i) => `
     <tr>
