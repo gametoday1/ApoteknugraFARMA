@@ -11,9 +11,10 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
     
     .login-page { min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .login-card { background: white; padding: 35px; border-radius: 14px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-    .login-card h1 { text-align: center; font-size: 22px; color: #333; margin-bottom: 8px; }
-    .login-card p { text-align: center; color: #888; margin-bottom: 25px; font-size: 13px; }
+    .login-card { background: white; padding: 35px; border-radius: 14px; max-width: 400px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center; }
+    .logo-container { width: 70px; height: 70px; background: linear-gradient(135deg, #43e97b, #38f9d7); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 32px; box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4); }
+    .login-card h1 { font-size: 20px; color: #333; margin-bottom: 5px; }
+    .login-card p { color: #888; margin-bottom: 25px; font-size: 13px; }
     .login-card input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; }
     .login-card input:focus { outline: none; border-color: #667eea; }
     .login-card button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
@@ -21,14 +22,18 @@
     .app-page { display: none; }
     .app-page.show { display: block; }
     
-    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; margin-bottom: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .header h1 { font-size: 24px; }
+    .header-brand { display: flex; align-items: center; gap: 12px; }
+    .header-logo { width: 45px; height: 45px; background: linear-gradient(135deg, #43e97b, #38f9d7); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .header h1 { font-size: 20px; font-weight: 700; }
     .header p { font-size: 12px; opacity: 0.9; }
-    .header button { padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .header button { padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
+    .header button:hover { background: rgba(255,255,255,0.3); }
     
     .nav { max-width: 1400px; margin: 0 auto 20px; padding: 0 20px; display: flex; gap: 8px; flex-wrap: wrap; overflow-x: auto; }
-    .nav-btn { padding: 10px 16px; background: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .nav-btn { padding: 10px 16px; background: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
+    .nav-btn:hover { background: #e0e7ff; }
     .nav-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
     
     .content { max-width: 1400px; margin: 0 auto; padding: 0 20px 40px; }
@@ -97,6 +102,7 @@
 <!-- LOGIN PAGE -->
 <div id="loginPage" class="login-page">
   <div class="login-card">
+    <div class="logo-container">💊</div>
     <h1>APOTEK NUGRAH FARMA</h1>
     <p>Login Sistem Kasir Siap Operasional</p>
     <input type="text" id="emailInput" placeholder="Username / Email">
@@ -110,9 +116,12 @@
 <div id="appPage" class="app-page">
   <div class="header">
     <div class="header-content">
-      <div>
-        <h1>Apotek Nugrah FARMA</h1>
-        <p>Kasir Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span> | WA: 0822-9037-3427</p>
+      <div class="header-brand">
+        <div class="header-logo">💊</div>
+        <div>
+          <h1>Apotek Nugrah FARMA</h1>
+          <p>Kasir Aktif: <span id="activeKasirShiftDisplay" style="font-weight: bold; color: #ffeb3b;">Belum Absen</span> | WA: 0822-9037-3427</p>
+        </div>
       </div>
       <button onclick="doLogout()">Logout</button>
     </div>
@@ -423,7 +432,7 @@ let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
 const FIXED_OWNER_PHONE = '6282290373427';
-const ADMIN_PIN = '1234'; // PIN khusus admin untuk hapus produk
+const ADMIN_PIN = '1234';
 
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
@@ -734,7 +743,7 @@ function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, not
       </head>
       <body>
         <div class="center">
-          <h3>${FIXED_APOTEK_NAME}</h3>
+          <h3>💊 ${FIXED_APOTEK_NAME}</h3>
           <div style="font-size: 10px;">Jl. Poros Kdi.- Moramo, Konawe Selatan<br>WA: 0822-9037-3427</div>
         </div>
         <div class="line"></div>
