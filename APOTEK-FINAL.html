@@ -190,7 +190,7 @@
           </div>
           <div class="form-group" style="margin-bottom: 12px;">
             <label>Hasil Pencarian</label>
-            <select id="pos_select_obat" size="4" style="height: 110px;" onchange="pilihObatDariDropdown()">
+            <select id="pos_select_obat" size="4" style="height: 100px;" onchange="pilihObatDariDropdown()">
               <option value="">-- Ketik atau scan produk --</option>
             </select>
           </div>
@@ -208,7 +208,18 @@
         </div>
 
         <div class="card">
-          <h3>🛒 Keranjang Belanja</h3>
+          <h3>🛒 Keranjang Belanja & Resep Dokter</h3>
+          <div class="form-grid" style="margin-bottom: 12px;">
+            <div class="form-group">
+              <label>Nama Pasien (Opsional)</label>
+              <input type="text" id="pos_pasien" placeholder="Nama pasien...">
+            </div>
+            <div class="form-group">
+              <label>Nama Dokter (Opsional)</label>
+              <input type="text" id="pos_dokter" placeholder="Nama dokter...">
+            </div>
+          </div>
+
           <table>
             <thead>
               <tr><th>Produk</th><th>Harga</th><th>Qty</th><th>Subtotal</th><th>Aksi</th></tr>
@@ -297,9 +308,17 @@
     <!-- CASH FLOW & LAPORAN OWNER -->
     <div id="cashflow" class="tab">
       <div class="card">
-        <h3>📊 Laporan Cash Flow & Kirim Rekap ke Owner</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Cetak laporan harian atau kirim rekap otomatis langsung ke WhatsApp Owner.</p>
-        
+        <h3>📊 Laporan Cash Flow & Filter Tanggal</h3>
+        <div class="form-grid" style="margin-bottom: 15px;">
+          <div class="form-group">
+            <label>Filter Berdasarkan Tanggal</label>
+            <input type="date" id="filterTanggal" onchange="renderCashFlowTable()">
+          </div>
+          <div class="form-group" style="display: flex; align-items: flex-end; gap: 10px;">
+            <button class="btn-submit" style="padding: 11px;" onclick="document.getElementById('filterTanggal').value=''; renderCashFlowTable();">Reset Filter</button>
+          </div>
+        </div>
+
         <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
           <button class="btn-submit" style="width: auto; padding: 8px 16px;" onclick="window.print()">🖨️ Cetak Laporan</button>
           <a id="btnKirimWaOwner" href="#" target="_blank" class="btn-wa" style="width: auto; padding: 8px 16px; margin: 0;">📤 Kirim Laporan ke WhatsApp Owner</a>
@@ -329,7 +348,7 @@
     <!-- STOK OPNAME -->
     <div id="opname" class="tab">
       <div class="card">
-        <h3>📋 Stok Opname & Manajemen Harga</h3>
+        <h3>📋 Stok Opname & Manajemen Harga (Proteksi PIN Admin)</h3>
         <table>
           <thead>
             <tr><th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga</th><th>Stok</th><th>Expired</th><th>Aksi</th></tr>
@@ -367,7 +386,10 @@
       </div>
 
       <div class="card" style="margin-top: 20px;">
-        <h3>📋 Riwayat Rekap Absensi Tersimpan</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3>📋 Riwayat Rekap Absensi Tersimpan</h3>
+          <button class="btn-submit" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="window.print()">🖨️ Cetak Rekap Absen</button>
+        </div>
         <table>
           <thead>
             <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Status</th><th>Waktu</th></tr>
@@ -385,7 +407,7 @@
         <h3>⚙️ Informasi Sistem Apotek</h3>
         <p style="font-size: 13px; color: #555; line-height: 1.6;">
           Sistem Operasional Kasir & Absensi <b>Apotek Nugrah FARMA</b>.<br>
-          Semua data transaksi, stok produk, dan absensi karyawan tersimpan aman dan permanen di perangkat ini.
+          Semua data transaksi, stok produk, resep, dan absensi karyawan tersimpan aman dan permanen di perangkat ini.
         </p>
       </div>
     </div>
@@ -401,7 +423,7 @@ let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
 const FIXED_OWNER_PHONE = '6282290373427';
-const FIXED_APOTEK_ADDRESS = 'Jl. Poros Kdi.- Moramo, Konawe Selatan\\nWA: 0822-9037-3427';
+const ADMIN_PIN = '1234'; // PIN khusus admin untuk hapus produk
 
 let appData = {
   cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
@@ -505,7 +527,7 @@ function catatAbsensi(statusAbsen) {
     localStorage.setItem('apotek_active_kasir', appData.activeKasir);
   }
 
-  appData.absensiList.push({ nama, shift, status: statusAbsen, waktu: `${dateStr} ${timeStr}` });
+  appData.absensiList.push({ nama, shift, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] });
   localStorage.setItem('apotek_absensi', JSON.stringify(appData.absensiList));
 
   loadActiveKasir();
@@ -645,6 +667,8 @@ function prosesTransaksiKasir() {
   if (posCart.length === 0) return alert('❌ Keranjang kosong!');
   const total = posCart.reduce((acc, curr) => acc + curr.subtotal, 0);
   const metode = document.getElementById('pos_metode').value;
+  const pasien = document.getElementById('pos_pasien').value.trim();
+  const dokter = document.getElementById('pos_dokter').value.trim();
   let bayar = total, kembali = 0;
 
   if (metode === 'CASH') {
@@ -668,21 +692,29 @@ function prosesTransaksiKasir() {
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
+  const rawDateStr = now.toISOString().split('T')[0];
   const notaId = 'NOTA-' + Math.floor(1000 + Math.random() * 9000);
   
-  appData.cashflow.push({ type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: `Nota: ${notaId} | Kasir: ${kasirShift}`, time: timeStr, date: dateStr });
+  let descText = `Nota: ${notaId} | Kasir: ${kasirShift}`;
+  if (pasien || dokter) {
+    descText += ` | Resep Pasien: ${pasien || '-'} (Dokter: ${dokter || '-'})`;
+  }
+
+  appData.cashflow.push({ type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: descText, time: timeStr, date: dateStr, rawDate: rawDateStr });
   localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
 
-  cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, kasirShift);
+  cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, kasirShift, pasien, dokter);
 
   posCart = [];
   document.getElementById('pos_bayar').value = '';
+  document.getElementById('pos_pasien').value = '';
+  document.getElementById('pos_dokter').value = '';
   renderPosCart();
   updateAllDisplay();
   alert(`✅ Transaksi ${notaId} Berhasil!`);
 }
 
-function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, kasirShift) {
+function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, kasirShift, pasien, dokter) {
   const frame = document.getElementById('printFrame');
   const doc = frame.contentWindow.document;
 
@@ -710,6 +742,7 @@ function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, not
         <div style="font-size: 10px;">Tgl: ${date} ${time}</div>
         <div style="font-size: 10px;">Metode: ${metode}</div>
         <div style="font-size: 10px;">Kasir: ${kasirShift}</div>
+        ${pasien || dokter ? `<div style="font-size: 10px; margin-top:2px;">Pasien: ${pasien || '-'}<br>Dokter: ${dokter || '-'}</div>` : ''}
         <div class="line"></div>
         ${items.map(i => `
           <div style="font-size: 12px; font-weight: 900; margin-top: 3px;">${i.nama}</div>
@@ -768,6 +801,42 @@ function simpanStokBarcode() {
   alert('✅ Stok produk / alkes berhasil diperbarui!');
 }
 
+function hapusProdukOpname(kode) {
+  const pin = prompt('🔐 Masukkan PIN Admin untuk menghapus produk:');
+  if (pin === ADMIN_PIN) {
+    delete appData.inventory[kode];
+    localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
+    updateAllDisplay();
+    alert('✅ Produk berhasil dihapus.');
+  } else if (pin !== null) {
+    alert('❌ PIN Admin salah!');
+  }
+}
+
+function renderCashFlowTable() {
+  const cashflowTable = document.getElementById('cashflowTable');
+  const filterDate = document.getElementById('filterTanggal').value;
+  
+  let filteredData = appData.cashflow;
+  if (filterDate) {
+    filteredData = appData.cashflow.filter(c => c.rawDate === filterDate);
+  }
+
+  if (filteredData.length === 0) {
+    cashflowTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada data transaksi</td></tr>';
+  } else {
+    cashflowTable.innerHTML = filteredData.slice().reverse().map((c, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><span class="badge ${c.type === 'INCOME' ? 'badge-ok' : 'badge-danger'}">${c.type}</span></td>
+        <td>${c.source} (${c.desc})</td>
+        <td>Rp ${c.amount.toLocaleString('id-ID')}</td>
+        <td>${c.date} ${c.time}</td>
+      </tr>
+    `).join('');
+  }
+}
+
 function updateAllDisplay() {
   const income = appData.cashflow.filter(c => c.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
   const expense = appData.cashflow.filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
@@ -791,12 +860,8 @@ function updateAllDisplay() {
   }
 
   const dashCashTable = document.getElementById('dashCashTable');
-  const cashflowTable = document.getElementById('cashflowTable');
-  
   if (appData.cashflow.length === 0) {
-    const emptyRow = '<tr><td colspan="5" style="text-align: center;">Belum ada data transaksi</td></tr>';
     dashCashTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>';
-    cashflowTable.innerHTML = emptyRow;
   } else {
     dashCashTable.innerHTML = appData.cashflow.slice(-5).reverse().map(c => `
       <tr>
@@ -806,17 +871,9 @@ function updateAllDisplay() {
         <td>${c.time}</td>
       </tr>
     `).join('');
-
-    cashflowTable.innerHTML = appData.cashflow.slice().reverse().map((c, i) => `
-      <tr>
-        <td>${i+1}</td>
-        <td><span class="badge ${c.type === 'INCOME' ? 'badge-ok' : 'badge-danger'}">${c.type}</span></td>
-        <td>${c.source} (${c.desc})</td>
-        <td>Rp ${c.amount.toLocaleString('id-ID')}</td>
-        <td>${c.date} ${c.time}</td>
-      </tr>
-    `).join('');
   }
+
+  renderCashFlowTable();
 
   const absenTable = document.getElementById('absensiHistoryTable');
   if (appData.absensiList.length === 0) {
@@ -846,7 +903,7 @@ function updateAllDisplay() {
       <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
       <td>${item.qty}</td>
       <td>${item.expired}</td>
-      <td><button class="btn-danger" onclick="delete appData.inventory['${kode}']; localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory)); updateAllDisplay();">Hapus</button></td>
+      <td><button class="btn-danger" onclick="hapusProdukOpname('${kode}')">Hapus</button></td>
     </tr>
   `).join('');
 
