@@ -320,16 +320,24 @@
     <!-- CASH FLOW & LAPORAN OWNER (PROTECTED) -->
     <div id="cashflow" class="tab">
       <div class="card">
-        <h3>📊 Laporan Cash Flow Keuangan & Rekap Owner 👑</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Menu eksklusif Owner untuk memantau seluruh uang masuk/keluar secara transparan.</p>
+        <h3>📊 Laporan Cash Flow, Rekap Shift & Keuangan 👑</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Menu eksklusif Owner untuk memantau omset harian dan rekap berdasarkan Shift Pagi / Siang.</p>
         
         <div class="form-grid" style="margin-bottom: 15px;">
           <div class="form-group">
             <label>Filter Berdasarkan Tanggal</label>
             <input type="date" id="filterTanggal" onchange="renderCashFlowTable()">
           </div>
+          <div class="form-group">
+            <label>Filter Berdasarkan Shift</label>
+            <select id="filterShift" onchange="renderCashFlowTable()">
+              <option value="">-- Semua Shift --</option>
+              <option value="Pagi">🌅 Shift Pagi</option>
+              <option value="Siang">☀️ Shift Siang</option>
+            </select>
+          </div>
           <div class="form-group" style="display: flex; align-items: flex-end; gap: 10px;">
-            <button class="btn-submit" style="padding: 11px;" onclick="document.getElementById('filterTanggal').value=''; renderCashFlowTable();">Reset Filter</button>
+            <button class="btn-submit" style="padding: 11px;" onclick="document.getElementById('filterTanggal').value=''; document.getElementById('filterShift').value=''; renderCashFlowTable();">Reset Filter</button>
           </div>
         </div>
 
@@ -340,10 +348,10 @@
 
         <table>
           <thead>
-            <tr><th>No</th><th>Jenis</th><th>Keterangan Lengkap</th><th>Nominal</th><th>Waktu</th></tr>
+            <tr><th>No</th><th>Jenis</th><th>Shift</th><th>Keterangan Lengkap</th><th>Nominal</th><th>Waktu</th></tr>
           </thead>
           <tbody id="cashflowTable">
-            <tr><td colspan="5" style="text-align: center;">Belum ada data</td></tr>
+            <tr><td colspan="6" style="text-align: center;">Belum ada data</td></tr>
           </tbody>
         </table>
       </div>
@@ -374,10 +382,10 @@
       </div>
     </div>
     
-    <!-- ABSENSI GPS -->
+    <!-- ABSENSI GPS & MODAL AWAL -->
     <div id="absensi" class="tab">
       <div class="card">
-        <h3>📍 Absensi Karyawan & Validasi Shift (GPS Terkunci)</h3>
+        <h3>📍 Absensi Karyawan, Modal Awal Laci & Validasi Shift</h3>
         <div id="mapContainer"></div>
         <div id="locationStatus" style="margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #1e3c72;">Mendeteksi lokasi GPS apotek...</div>
         <div class="form-grid">
@@ -392,24 +400,28 @@
               <option value="Siang">☀️ Shift Siang</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Modal Awal Laci Kasir (Rp)</label>
+            <input type="number" id="abs_modal" placeholder="Contoh: 200000">
+          </div>
         </div>
         <div style="display: flex; gap: 10px;">
-          <button class="btn-submit" style="background: #10b981;" onclick="catatAbsensi('MASUK')">🟢 Absen Masuk (Check-In)</button>
+          <button class="btn-submit" style="background: #10b981;" onclick="catatAbsensi('MASUK')">🟢 Absen Masuk & Set Modal Awal</button>
           <button class="btn-submit" style="background: #ef4444;" onclick="catatAbsensi('PULANG')">🔴 Absen Pulang (Check-Out)</button>
         </div>
       </div>
 
       <div class="card" style="margin-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h3>📋 Riwayat Rekap Kehadiran Shift</h3>
+          <h3>📋 Riwayat Rekap Kehadiran & Modal Kasir</h3>
           <button class="btn-submit" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="window.print()">🖨️ Cetak Absensi</button>
         </div>
         <table>
           <thead>
-            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Status</th><th>Waktu & GPS</th></tr>
+            <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Modal Awal</th><th>Status</th><th>Waktu & GPS</th></tr>
           </thead>
           <tbody id="absensiHistoryTable">
-            <tr><td colspan="5" style="text-align: center;">Belum ada riwayat absensi</td></tr>
+            <tr><td colspan="6" style="text-align: center;">Belum ada riwayat absensi</td></tr>
           </tbody>
         </table>
       </div>
@@ -568,6 +580,8 @@ function initMapAbsensi() {
 function catatAbsensi(statusAbsen) {
   const nama = document.getElementById('abs_nama').value.trim();
   const shift = document.getElementById('abs_shift').value;
+  const modalAwal = parseInt(document.getElementById('abs_modal').value) || 0;
+
   if (!nama) return alert('❌ Masukkan nama karyawan terlebih dahulu!');
 
   const now = new Date();
@@ -577,9 +591,24 @@ function catatAbsensi(statusAbsen) {
   if (statusAbsen === 'MASUK') {
     appData.activeKasir = `${nama} (Shift ${shift})`;
     localStorage.setItem('apotek_active_kasir', appData.activeKasir);
+    
+    // Catat modal awal ke cashflow sebagai referensi kasir
+    if (modalAwal > 0) {
+      appData.cashflow.push({
+        type: 'INCOME',
+        shift: shift,
+        source: 'Modal Awal Laci',
+        amount: modalAwal,
+        desc: `Kasir: ${nama} (Shift ${shift}) | Modal Awal`,
+        time: timeStr,
+        date: dateStr,
+        rawDate: now.toISOString().split('T')[0]
+      });
+      localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
+    }
   }
 
-  const absenObj = { nama, shift, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] };
+  const absenObj = { nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] };
   appData.absensiList.push(absenObj);
   localStorage.setItem('apotek_absensi', JSON.stringify(appData.absensiList));
 
@@ -587,6 +616,7 @@ function catatAbsensi(statusAbsen) {
   updateAllDisplay();
   alert(`✅ Absen ${statusAbsen} berhasil dicatat untuk ${nama} (Shift ${shift})!`);
   document.getElementById('abs_nama').value = '';
+  document.getElementById('abs_modal').value = '';
 }
 
 function loadActiveKasir() {
@@ -742,6 +772,8 @@ function prosesTransaksiKasir() {
   localStorage.setItem('apotek_sales_count', JSON.stringify(appData.salesCount));
 
   const currentSession = localStorage.getItem('apotek_session_name') || 'Kasir';
+  const activeShift = appData.activeKasir.includes('Shift Pagi') ? 'Pagi' : (appData.activeKasir.includes('Shift Siang') ? 'Siang' : 'Umum');
+  
   const now = new Date();
   const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
@@ -753,7 +785,7 @@ function prosesTransaksiKasir() {
     descText += ` | Resep Pasien: ${pasien || '-'} (Dokter: ${dokter || '-'})`;
   }
 
-  const txObj = { type: 'INCOME', source: `Penjualan (${metode})`, amount: total, desc: descText, time: timeStr, date: dateStr, rawDate: rawDateStr };
+  const txObj = { type: 'INCOME', shift: activeShift, source: `Penjualan (${metode})`, amount: total, desc: descText, time: timeStr, date: dateStr, rawDate: rawDateStr };
   appData.cashflow.push(txObj);
   localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
 
@@ -880,19 +912,24 @@ function downloadBackupData() {
 function renderCashFlowTable() {
   const cashflowTable = document.getElementById('cashflowTable');
   const filterDate = document.getElementById('filterTanggal').value;
+  const filterShift = document.getElementById('filterShift').value;
   
   let filteredData = appData.cashflow;
   if (filterDate) {
-    filteredData = appData.cashflow.filter(c => c.rawDate === filterDate);
+    filteredData = filteredData.filter(c => c.rawDate === filterDate);
+  }
+  if (filterShift) {
+    filteredData = filteredData.filter(c => c.shift === filterShift);
   }
 
   if (filteredData.length === 0) {
-    cashflowTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada data transaksi</td></tr>';
+    cashflowTable.innerHTML = '<tr><td colspan="6" style="text-align: center;">Belum ada data transaksi</td></tr>';
   } else {
     cashflowTable.innerHTML = filteredData.slice().reverse().map((c, i) => `
       <tr>
         <td>${i+1}</td>
         <td><span class="badge ${c.type === 'INCOME' ? 'badge-ok' : 'badge-danger'}">${c.type}</span></td>
+        <td><span class="badge" style="background:#e0e7ff; color:#1e3c72;">${c.shift || 'Umum'}</span></td>
         <td>${c.source} (${c.desc})</td>
         <td>Rp ${c.amount.toLocaleString('id-ID')}</td>
         <td>${c.date} ${c.time}</td>
@@ -941,13 +978,14 @@ function updateAllDisplay() {
 
   const absenTable = document.getElementById('absensiHistoryTable');
   if (appData.absensiList.length === 0) {
-    absenTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada riwayat absensi</td></tr>';
+    absenTable.innerHTML = '<tr><td colspan="6" style="text-align: center;">Belum ada riwayat absensi</td></tr>';
   } else {
     absenTable.innerHTML = appData.absensiList.slice().reverse().map((a, i) => `
       <tr>
         <td>${i+1}</td>
         <td>${a.nama}</td>
         <td>Shift ${a.shift}</td>
+        <td>Rp ${(a.modal || 0).toLocaleString('id-ID')}</td>
         <td><span class="badge ${a.status === 'MASUK' ? 'badge-ok' : 'badge-danger'}">${a.status}</span></td>
         <td>${a.waktu}</td>
       </tr>
