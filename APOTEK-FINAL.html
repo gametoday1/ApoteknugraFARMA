@@ -433,9 +433,12 @@
         <h3>⚙️ Pengaturan & Backup Data Keamanan Owner 👑</h3>
         <p style="font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 15px;">
           Apotek Nugrah FARMA beroperasi dengan standar pengamanan data lokal dan audit berlapis.<br>
-          Gunakan tombol di bawah untuk mencadangkan seluruh data master obat dan transaksi ke perangkat Anda.
+          Gunakan tombol di bawah untuk mencadangkan data atau mereset seluruh data transaksi uji coba.
         </p>
-        <button class="btn-submit" style="width: auto; padding: 10px 20px; background: #2a5298;" onclick="downloadBackupData()">💾 Download Backup Data (JSON)</button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn-submit" style="width: auto; padding: 10px 20px; background: #2a5298;" onclick="downloadBackupData()">💾 Download Backup Data (JSON)</button>
+          <button class="btn-danger" style="padding: 10px 20px; font-size: 14px;" onclick="resetSemuaDataUjiCoba()">🗑️ Reset Semua Data (Mulai Baru)</button>
+        </div>
       </div>
     </div>
 
@@ -907,6 +910,20 @@ function downloadBackupData() {
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
+}
+
+function resetSemuaDataUjiCoba() {
+  const pin = prompt('🔐 PERINGATAN! Ini akan membersihkan seluruh data transaksi, cash flow, dan absensi uji coba. Masukkan PIN Owner (426022):');
+  if (pin === OWNER_ADMIN_PIN) {
+    localStorage.removeItem('apotek_cashflow');
+    localStorage.removeItem('apotek_absensi');
+    localStorage.removeItem('apotek_sales_count');
+    localStorage.removeItem('apotek_active_kasir');
+    alert('✅ Data uji coba berhasil dibersihkan total! Sistem siap digunakan.');
+    location.reload();
+  } else if (pin !== null) {
+    alert('❌ PIN Owner salah! Reset dibatalkan.');
+  }
 }
 
 function renderCashFlowTable() {
