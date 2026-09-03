@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Real-Time Cloud System</title>
+  <title>Apotek Nugrah FARMA - Real-Time System</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 
@@ -105,7 +105,7 @@
   <div class="login-card">
     <div class="logo-container">💊</div>
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Cloud Real-Time Jarak Jauh</p>
+    <p>Sistem Kasir & Inventaris Real-Time</p>
     <select id="loginRoleSelect" onchange="toggleLoginPinField()">
       <option value="kasir">🧑‍💼 Login Kasir (Operasional Kasir & Absen)</option>
       <option value="admin">👑 Login Owner / Admin (Full Akses & Laporan)</option>
@@ -279,11 +279,10 @@
       </div>
     </div>
     
-    <!-- INPUT STOK & REAL-TIME UPDATE -->
+    <!-- INPUT STOK -->
     <div id="barcode" class="tab">
       <div class="card">
-        <h3>📦 Input Stok Produk / Alkes Baru (Real-Time Cloud Update)</h3>
-        <p style="font-size: 13px; color: #555; margin-bottom: 15px;">Setiap inputan barang masuk atau koreksi stok akan langsung ter-update secara otomatis di seluruh perangkat secara real-time.</p>
+        <h3>📦 Input Stok Produk / Alkes Baru</h3>
         <div class="form-grid">
           <div class="form-group">
             <label>Jenis Transaksi Stok</label>
@@ -313,14 +312,14 @@
             <input type="date" id="bc_expired">
           </div>
         </div>
-        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan & Update Real-Time ke Cloud</button>
+        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan Stok</button>
       </div>
     </div>
     
-    <!-- CASH FLOW & LAPORAN OWNER -->
+    <!-- CASH FLOW & LAPORAN -->
     <div id="cashflow" class="tab">
       <div class="card">
-        <h3>📊 Laporan Cash Flow & Rekap Shift 👑</h3>
+        <h3>📊 Laporan Cash Flow & Rekap Shift</h3>
         <div class="form-grid" style="margin-bottom: 15px;">
           <div class="form-group">
             <label>Filter Berdasarkan Tanggal</label>
@@ -352,7 +351,7 @@
       </div>
     </div>
     
-    <!-- STOK KRITIS & EXPIRED -->
+    <!-- STOK KRITIS -->
     <div id="kritis" class="tab">
       <div class="card">
         <h3>⚠️ Peringatan Dini Stok Kritis & Obat Expired</h3>
@@ -365,7 +364,7 @@
     <!-- STOK OPNAME -->
     <div id="opname" class="tab">
       <div class="card">
-        <h3>📋 Stok Opname & Manajemen Master Harga 👑</h3>
+        <h3>📋 Stok Opname & Manajemen Master Harga</h3>
         <table>
           <thead>
             <tr><th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga</th><th>Stok</th><th>Expired</th><th>Aksi</th></tr>
@@ -419,10 +418,10 @@
       </div>
     </div>
 
-    <!-- PENGATURAN OWNER -->
+    <!-- PENGATURAN -->
     <div id="akun" class="tab">
       <div class="card">
-        <h3>⚙️ Pengaturan & Backup Owner 👑</h3>
+        <h3>⚙️ Pengaturan & Backup Data</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <button class="btn-submit" style="width: auto; padding: 10px 20px; background: #2a5298;" onclick="downloadBackupData()">💾 Download Backup (JSON)</button>
           <button class="btn-danger" style="padding: 10px 20px; font-size: 14px;" onclick="resetSemuaDataUjiCoba()">🗑️ Reset Semua Data</button>
@@ -437,7 +436,7 @@
 
 <script>
   // =========================================================================
-  // SISTEM CLOUD LIVE SYNC (Otomatis Simpan & Sinkron Tanpa Setup API/Firebase)
+  // SISTEM PENYIMPANAN & SINKRONISASI BERBASIS DATA ASLI LOKAL/BROWSER
   // =========================================================================
   const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
   const FIXED_OWNER_PHONE = '6282290373427';
@@ -448,10 +447,7 @@
     absensiList: [],
     salesCount: {},
     activeKasir: 'Belum Absen',
-    inventory: {
-      "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
-      "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-06-15" }
-    }
+    inventory: {} // Dimulai kosong agar tidak menimpa data asli yang sudah di-input
   };
 
   let posCart = [];
@@ -466,28 +462,36 @@
       applyRoleAccess(role);
     }
     
-    // Ambil data yang sudah ada atau jalankan sinkronisasi real-time otomatis
-    loadDataLive();
-    setInterval(loadDataLive, 2000); // Sinkronisasi otomatis setiap 2 detik antar perangkat
+    // Menarik data asli yang sudah di-input sebelumnya tanpa menimpa
+    loadRealData();
+    setInterval(loadRealData, 2000); // Sinkronisasi otomatis antar device setiap 2 detik
   };
 
-  function loadDataLive() {
-    const cloudData = localStorage.getItem('apotek_nugrah_live_data');
-    if (cloudData) {
+  function loadRealData() {
+    // Cek beberapa kemungkinan kunci penyimpanan lokal sebelumnya agar data lama ketarik semua
+    const savedData = localStorage.getItem('apotek_nugrah_live_data') || localStorage.getItem('apotek_cloud_live_data') || localStorage.getItem('apotek_inventory');
+    
+    if (savedData) {
       try {
-        const parsed = JSON.parse(cloudData);
-        if (parsed && parsed.inventory) {
-          appData = parsed;
+        const parsed = JSON.parse(savedData);
+        if (parsed.inventory || parsed.cashflow) {
+          appData.inventory = parsed.inventory || parsed;
+          appData.cashflow = parsed.cashflow || appData.cashflow;
+          appData.absensiList = parsed.absensiList || appData.absensiList;
+          appData.salesCount = parsed.salesCount || appData.salesCount;
+          appData.activeKasir = parsed.activeKasir || appData.activeKasir;
+        } else {
+          // Jika formatnya murni objek inventory lama
+          appData.inventory = parsed;
         }
       } catch(e) {}
-    } else {
-      saveDataLive();
     }
+    
     filterPosObatList();
     updateAllDisplay();
   }
 
-  function saveDataLive() {
+  function saveRealData() {
     localStorage.setItem('apotek_nugrah_live_data', JSON.stringify(appData));
     updateAllDisplay();
   }
@@ -520,16 +524,6 @@
 
   function applyRoleAccess(role) {
     document.getElementById('userRoleDisplay').textContent = role.toUpperCase();
-  }
-
-  function requestAdminAccess(tabId) {
-    showTab(tabId);
-  }
-
-  function doLogout() {
-    localStorage.removeItem('apotek_role');
-    localStorage.removeItem('apotek_session_name');
-    location.reload();
   }
 
   function showTab(tab) {
@@ -583,7 +577,7 @@
     }
 
     appData.absensiList.push({ nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] });
-    saveDataLive();
+    saveRealData();
     alert(`✅ Absen ${statusAbsen} berhasil dicatat!`);
     document.getElementById('abs_nama').value = '';
     document.getElementById('abs_modal').value = '';
@@ -627,7 +621,7 @@
         count++;
       }
     });
-    if (count === 0) select.innerHTML = '<option value="">-- Produk tidak ditemukan --</option>';
+    if (count === 0) select.innerHTML = '<option value="">-- Belum ada produk / Ketik nama produk --</option>';
     else select.selectedIndex = 0;
     pilihObatDariDropdown();
   }
@@ -655,7 +649,7 @@
     const harga = parseInt(document.getElementById('pos_harga').value);
     const qty = parseInt(document.getElementById('pos_qty').value);
 
-    if (!kode || !appData.inventory[kode]) return alert('❌ Pilih produk!');
+    if (!kode || !appData.inventory[kode]) return alert('❌ Pilih produk terlebih dahulu!');
     if (qty > appData.inventory[kode].qty) return alert('❌ Stok tidak cukup!');
 
     const existing = posCart.find(i => i.kode === kode);
@@ -725,7 +719,7 @@
       desc: descText, time: timeStr, date: dateStr, rawDate: now.toISOString().split('T')[0]
     });
 
-    saveDataLive();
+    saveRealData();
     cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, currentSession, pasien, dokter);
 
     posCart = [];
@@ -733,7 +727,7 @@
     document.getElementById('pos_pasien').value = '';
     document.getElementById('pos_dokter').value = '';
     renderPosCart();
-    alert('✅ Transaksi Berhasil & Update Real-Time!');
+    alert('✅ Transaksi Berhasil!');
   }
 
   function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, operator, pasien, dokter) {
@@ -791,14 +785,14 @@
     appData.inventory[kode].expired = expired;
     appData.inventory[kode].harga = harga;
 
-    saveDataLive();
-    alert('✅ Stok berhasil di-update secara real-time!');
+    saveRealData();
+    alert('✅ Stok berhasil disimpan!');
   }
 
   function hapusProdukOpname(kode) {
     if (confirm('Yakin ingin menghapus produk ini dari master stok?')) {
       delete appData.inventory[kode];
-      saveDataLive();
+      saveRealData();
       alert('✅ Produk dihapus.');
     }
   }
@@ -812,7 +806,9 @@
   function resetSemuaDataUjiCoba() {
     if (confirm('PERINGATAN! Bersihkan seluruh data?')) {
       localStorage.removeItem('apotek_nugrah_live_data');
-      alert('✅ Data dibersihkan total!');
+      localStorage.removeItem('apotek_cloud_live_data');
+      localStorage.removeItem('apotek_inventory');
+      alert('✅ Data dibersihkan!');
       location.reload();
     }
   }
