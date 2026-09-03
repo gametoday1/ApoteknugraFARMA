@@ -3,9 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Real-Time System</title>
+  <title>Apotek Nugrah FARMA - Full Stack POS & Local Growth Engine</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- Local SEO Meta Tags untuk Google Organic Search -->
+  <meta name="description" content="Apotek Nugrah FARMA adalah apotek terpercaya di Konawe Selatan dan Kendari yang menyediakan obat lengkap, alkes, resep dokter, dan pelayanan kesehatan profesional.">
+  <meta name="keywords" content="Apotek Nugrah Farma, Apotek di Kendari, Apotek Konawe Selatan, Beli Obat Kendari, Apotek Lengkap Moramo">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -62,13 +70,20 @@
     
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
-    .form-group input, .form-group select { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: #1e3c72; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1e3c72; }
     
     .btn-submit { width: 100%; padding: 12px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
     .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn-wa { background: #25d366; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: inline-block; text-align: center; text-decoration: none; width: 100%; margin-top: 10px; }
     
+    .social-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 15px; }
+    .soc-btn { padding: 10px; border-radius: 8px; border: none; color: white; font-weight: 600; cursor: pointer; font-size: 13px; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-fb { background: #1877f2; }
+    .btn-ig { background: #e1306c; }
+    .btn-tw { background: #000000; }
+    .btn-tg { background: #0088cc; }
+
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
     table thead { background: #f8f9fa; }
     table th { padding: 10px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #e0e0e0; }
@@ -105,7 +120,7 @@
   <div class="login-card">
     <div class="logo-container">💊</div>
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Kasir & Inventaris Real-Time</p>
+    <p>Sistem Kasir & Logika Integrasi Operasional</p>
     <select id="loginRoleSelect" onchange="toggleLoginPinField()">
       <option value="kasir">🧑‍💼 Login Kasir (Operasional Kasir & Absen)</option>
       <option value="admin">👑 Login Owner / Admin (Full Akses & Laporan)</option>
@@ -139,6 +154,7 @@
     <button class="nav-btn" onclick="showTab('kritis')">🚨 Stok Kritis & Expired</button>
     <button class="nav-btn" onclick="showTab('opname')">📋 Stok Opname</button>
     <button class="nav-btn" onclick="showTab('absensi')">✋ Absensi Karyawan</button>
+    <button class="nav-btn" onclick="showTab('growth')">🚀 Auto Growth & Sosmed</button>
     <button class="nav-btn" onclick="showTab('akun')">⚙️ Pengaturan Owner</button>
   </div>
   
@@ -418,13 +434,39 @@
       </div>
     </div>
 
+    <!-- AUTO GROWTH & SOSMED -->
+    <div id="growth" class="tab">
+      <div class="card">
+        <h3>🚀 Auto Growth & Local SEO Syndication Engine</h3>
+        <p style="font-size: 13px; color: #555; margin-bottom: 15px;">Algoritma otomatis membuat konten promosi yang disisipi keyword lokal (Kendari & Konawe Selatan) untuk dibagikan ke sosmed.</p>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label>Pilih Jenis Konten</label>
+          <select id="promoType" onchange="generateViralCaption()">
+            <option value="resep">💊 Layanan Resep Dokter & Obat Lengkap</option>
+            <option value="alkes">🩺 Alat Kesehatan & Perawatan Rumah</option>
+            <option value="buka">⏰ Info Apotek & Lokasi Terdekat</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label>Pratinjau Teks Konten</label>
+          <textarea id="viralCaptionBox" rows="5" style="font-family: monospace; font-size: 13px;" readonly></textarea>
+        </div>
+        <div class="social-btn-grid">
+          <button class="soc-btn btn-wa" onclick="shareToPlatform('whatsapp')">💬 Sebar ke WhatsApp</button>
+          <button class="soc-btn btn-fb" onclick="shareToPlatform('facebook')">📘 Bagikan ke Facebook</button>
+          <button class="soc-btn btn-tw" onclick="shareToPlatform('twitter')">🐦 Post ke Twitter/X</button>
+          <button class="soc-btn btn-tg" onclick="shareToPlatform('telegram')">✈️ Kirim ke Telegram</button>
+        </div>
+      </div>
+    </div>
+
     <!-- PENGATURAN -->
     <div id="akun" class="tab">
       <div class="card">
         <h3>⚙️ Pengaturan & Backup Data</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <button class="btn-submit" style="width: auto; padding: 10px 20px; background: #2a5298;" onclick="downloadBackupData()">💾 Download Backup (JSON)</button>
-          <button class="btn-danger" style="padding: 10px 20px; font-size: 14px;" onclick="resetSemuaDataUjiCoba()">🗑️ Reset Semua Data</button>
+          <button class="btn-danger" style="padding: 10px 20px; font-size: 14px;" onclick="resetSemuaDataUjiCoba()">🗑️ Reset / Bersihkan Data</button>
         </div>
       </div>
     </div>
@@ -436,8 +478,21 @@
 
 <script>
   // =========================================================================
-  // SISTEM PENYIMPANAN & SINKRONISASI BERBASIS DATA ASLI LOKAL/BROWSER
+  // LOGIKA UTUH FULL STACK - CLOUD REAL-TIME SYNC & LOCAL ENGINE
   // =========================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-contoh-ganti-dengan-punyamu",
+    authDomain: "apotek-nugrah-farma.firebaseapp.com",
+    databaseURL: "https://apotek-nugrah-farma-default-rtdb.firebaseio.com",
+    projectId: "apotek-nugrah-farma",
+    storageBucket: "apotek-nugrah-farma.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:123:web:abc"
+  };
+
+  try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+  const db = typeof firebase !== 'undefined' ? firebase.database() : null;
+
   const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
   const FIXED_OWNER_PHONE = '6282290373427';
   const OWNER_ADMIN_PIN = '426022';
@@ -447,7 +502,7 @@
     absensiList: [],
     salesCount: {},
     activeKasir: 'Belum Absen',
-    inventory: {} // Dimulai kosong agar tidak menimpa data asli yang sudah di-input
+    inventory: {}
   };
 
   let posCart = [];
@@ -461,39 +516,73 @@
       document.getElementById('appPage').classList.add('show');
       applyRoleAccess(role);
     }
-    
-    // Menarik data asli yang sudah di-input sebelumnya tanpa menimpa
-    loadRealData();
-    setInterval(loadRealData, 2000); // Sinkronisasi otomatis antar device setiap 2 detik
+    initCompleteSystemSync();
+    generateViralCaption();
   };
 
-  function loadRealData() {
-    // Cek beberapa kemungkinan kunci penyimpanan lokal sebelumnya agar data lama ketarik semua
-    const savedData = localStorage.getItem('apotek_nugrah_live_data') || localStorage.getItem('apotek_cloud_live_data') || localStorage.getItem('apotek_inventory');
-    
-    if (savedData) {
+  function generateViralCaption() {
+    const type = document.getElementById('promoType').value;
+    let text = "";
+    if (type === 'resep') {
+      text = `🏥 Cari Obat & Tebus Resep Dokter Terlengkap di Kendari & Konawe Selatan?\n\nKunjungi *Apotek Nugrah FARMA*! Kami menyediakan sediaan obat lengkap, vitamin, suplemen, dan pelayanan farmasi terpercaya dengan harga bersahabat.\n\n📍 Lokasi: Jl. Poros Kendari - Moramo, Konawe Selatan\n📞 Info & Konsultasi: wa.me/${FIXED_OWNER_PHONE}\n\n#ApotekNugrahFarma #ApotekKendari #KonaweSelatan #BeliObatKendari #TebusResepDokter`;
+    } else if (type === 'alkes') {
+      text = `🩺 Butuh Alat Kesehatan (Alkes) & Perlengkapan Medis Berkualitas di Kendari?\n\n*Apotek Nugrah FARMA* menyediakan berbagai kebutuhan alkes mulai dari tensimeter, termometer, masker, hingga perawatan luka.\n\n📍 Jl. Poros Kendari - Moramo, Konsel\n\n#AlkesKendari #ApotekNugrahFarma #AlatKesehatanKonsel #SehatBersamaApotek`;
+    } else {
+      text = `⭐ Solusi Kesehatan Keluarga Anda di Wilayah Konawe Selatan & Kendari!\n\n*Apotek Nugrah FARMA* siap melayani kebutuhan obat resep, bebas, dan konsultasi kesehatan harian Anda.\n\n📍 Jl. Poros Kendari - Moramo, Konsel\n\n#ApotekTerdekat #ApotekNugrahFarma #KendariInfo #SehatSelalu`;
+    }
+    document.getElementById('viralCaptionBox').value = text;
+  }
+
+  function shareToPlatform(platform) {
+    const caption = encodeURIComponent(document.getElementById('viralCaptionBox').value);
+    let url = "";
+    if (platform === 'whatsapp') url = `https://api.whatsapp.com/send?text=${caption}`;
+    else if (platform === 'facebook') url = `https://www.facebook.com/sharer/sharer.php?u=&quote=${caption}`;
+    else if (platform === 'twitter') url = `https://twitter.com/intent/tweet?text=${caption}`;
+    else if (platform === 'telegram') url = `https://t.me/share/url?url=&text=${caption}`;
+    window.open(url, '_blank');
+  }
+
+  function initCompleteSystemSync() {
+    const localData = localStorage.getItem('apotek_nugrah_live_data');
+    if (localData) {
       try {
-        const parsed = JSON.parse(savedData);
-        if (parsed.inventory || parsed.cashflow) {
-          appData.inventory = parsed.inventory || parsed;
-          appData.cashflow = parsed.cashflow || appData.cashflow;
-          appData.absensiList = parsed.absensiList || appData.absensiList;
-          appData.salesCount = parsed.salesCount || appData.salesCount;
-          appData.activeKasir = parsed.activeKasir || appData.activeKasir;
-        } else {
-          // Jika formatnya murni objek inventory lama
-          appData.inventory = parsed;
-        }
+        const parsed = JSON.parse(localData);
+        if (parsed && parsed.inventory) appData = parsed;
       } catch(e) {}
     }
-    
+
+    if (db) {
+      db.ref('inventory').on('value', (snapshot) => {
+        const val = snapshot.val();
+        if (val) { appData.inventory = val; saveLocalBackup(); filterPosObatList(); updateAllDisplay(); }
+      });
+      db.ref('cashflow').on('value', (snapshot) => {
+        const val = snapshot.val();
+        appData.cashflow = val ? Object.values(val) : [];
+        saveLocalBackup(); updateAllDisplay(); generateWaReportLink();
+      });
+      db.ref('absensiList').on('value', (snapshot) => {
+        const val = snapshot.val();
+        appData.absensiList = val ? Object.values(val) : [];
+        saveLocalBackup(); updateAllDisplay();
+      });
+      db.ref('salesCount').on('value', (snapshot) => {
+        const val = snapshot.val();
+        appData.salesCount = val || {};
+        saveLocalBackup(); updateAllDisplay();
+      });
+      db.ref('activeKasir').on('value', (snapshot) => {
+        const val = snapshot.val();
+        if (val) { appData.activeKasir = val; document.getElementById('activeKasirShiftDisplay').textContent = val; }
+      });
+    }
     filterPosObatList();
     updateAllDisplay();
   }
 
-  function saveRealData() {
+  function saveLocalBackup() {
     localStorage.setItem('apotek_nugrah_live_data', JSON.stringify(appData));
-    updateAllDisplay();
   }
 
   function toggleLoginPinField() {
@@ -568,16 +657,23 @@
 
     if (statusAbsen === 'MASUK') {
       appData.activeKasir = `${nama} (Shift ${shift})`;
+      if (db) db.ref('activeKasir').set(appData.activeKasir);
       if (modalAwal > 0) {
-        appData.cashflow.push({
+        const cashObj = {
           type: 'INCOME', shift: shift, source: 'Modal Awal Laci', amount: modalAwal,
           desc: `Kasir: ${nama} (Shift ${shift}) | Modal Awal`, time: timeStr, date: dateStr, rawDate: now.toISOString().split('T')[0]
-        });
+        };
+        appData.cashflow.push(cashObj);
+        if (db) db.ref('cashflow').push(cashObj);
       }
     }
 
-    appData.absensiList.push({ nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] });
-    saveRealData();
+    const absenObj = { nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] };
+    appData.absensiList.push(absenObj);
+    if (db) db.ref('absensiList').push(absenObj);
+
+    saveLocalBackup();
+    updateAllDisplay();
     alert(`✅ Absen ${statusAbsen} berhasil dicatat!`);
     document.getElementById('abs_nama').value = '';
     document.getElementById('abs_modal').value = '';
@@ -703,6 +799,11 @@
       appData.salesCount[item.nama] = (appData.salesCount[item.nama] || 0) + item.qty;
     });
 
+    if (db) {
+      db.ref('inventory').set(appData.inventory);
+      db.ref('salesCount').set(appData.salesCount);
+    }
+
     const currentSession = localStorage.getItem('apotek_session_name') || 'Kasir';
     const activeShift = appData.activeKasir.includes('Shift Pagi') ? 'Pagi' : (appData.activeKasir.includes('Shift Siang') ? 'Siang' : 'Umum');
     
@@ -714,12 +815,14 @@
     let descText = `Nota: ${notaId} | Operator: ${currentSession}`;
     if (pasien || dokter) descText += ` | Pasien: ${pasien || '-'} (Dokter: ${dokter || '-'})`;
 
-    appData.cashflow.push({
+    const cashObj = {
       type: 'INCOME', shift: activeShift, source: `Penjualan (${metode})`, amount: total,
       desc: descText, time: timeStr, date: dateStr, rawDate: now.toISOString().split('T')[0]
-    });
+    };
+    appData.cashflow.push(cashObj);
+    if (db) db.ref('cashflow').push(cashObj);
 
-    saveRealData();
+    saveLocalBackup();
     cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, currentSession, pasien, dokter);
 
     posCart = [];
@@ -785,14 +888,18 @@
     appData.inventory[kode].expired = expired;
     appData.inventory[kode].harga = harga;
 
-    saveRealData();
+    if (db) db.ref('inventory').set(appData.inventory);
+    saveLocalBackup();
+    updateAllDisplay();
     alert('✅ Stok berhasil disimpan!');
   }
 
   function hapusProdukOpname(kode) {
     if (confirm('Yakin ingin menghapus produk ini dari master stok?')) {
       delete appData.inventory[kode];
-      saveRealData();
+      if (db) db.ref('inventory').set(appData.inventory);
+      saveLocalBackup();
+      updateAllDisplay();
       alert('✅ Produk dihapus.');
     }
   }
@@ -804,11 +911,16 @@
   }
 
   function resetSemuaDataUjiCoba() {
-    if (confirm('PERINGATAN! Bersihkan seluruh data?')) {
+    if (confirm('PERINGATAN! Bersihkan seluruh data aplikasi?')) {
       localStorage.removeItem('apotek_nugrah_live_data');
-      localStorage.removeItem('apotek_cloud_live_data');
-      localStorage.removeItem('apotek_inventory');
-      alert('✅ Data dibersihkan!');
+      if (db) {
+        db.ref('inventory').remove();
+        db.ref('cashflow').remove();
+        db.ref('absensiList').remove();
+        db.ref('salesCount').remove();
+        db.ref('activeKasir').remove();
+      }
+      alert('✅ Data dibersihkan total!');
       location.reload();
     }
   }
@@ -817,7 +929,7 @@
     const tbody = document.getElementById('cashflowTable');
     const filterDate = document.getElementById('filterTanggal').value;
     const filterShift = document.getElementById('filterShift').value;
-    let data = appData.cashflow;
+    let data = appData.cashflow || [];
     if (filterDate) data = data.filter(c => c.rawDate === filterDate);
     if (filterShift) data = data.filter(c => c.shift === filterShift);
 
@@ -828,28 +940,28 @@
   }
 
   function updateAllDisplay() {
-    const income = appData.cashflow.filter(c => c.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
-    const expense = appData.cashflow.filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
+    const income = (appData.cashflow || []).filter(c => c.type === 'INCOME').reduce((a, b) => a + b.amount, 0);
+    const expense = (appData.cashflow || []).filter(c => c.type === 'EXPENSE').reduce((a, b) => a + b.amount, 0);
     document.getElementById('dashIncome').textContent = 'Rp ' + income.toLocaleString('id-ID');
     document.getElementById('dashExpense').textContent = 'Rp ' + expense.toLocaleString('id-ID');
-    document.getElementById('todayAbsen').textContent = appData.absensiList.length;
-    document.getElementById('activeKasirShiftDisplay').textContent = appData.activeKasir;
+    document.getElementById('todayAbsen').textContent = (appData.absensiList || []).length;
+    document.getElementById('activeKasirShiftDisplay').textContent = appData.activeKasir || 'Belum Absen';
 
-    const bestSeller = Object.entries(appData.salesCount).sort((a,b) => b[1] - a[1]);
+    const bestSeller = Object.entries(appData.salesCount || {}).sort((a,b) => b[1] - a[1]);
     document.getElementById('bestSellerTable').innerHTML = bestSeller.length === 0 ? '<tr><td colspan="3" style="text-align: center;">Belum ada penjualan</td></tr>' :
       bestSeller.slice(0, 5).map(([n, q], i) => `<tr><td><b>#${i+1}</b></td><td>${n}</td><td><span class="badge badge-ok">${q} Terjual</span></td></tr>`).join('');
 
-    document.getElementById('dashCashTable').innerHTML = appData.cashflow.length === 0 ? '<tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>' :
-      appData.cashflow.slice(-5).reverse().map(c => `<tr><td><span class="badge ${c.type==='INCOME'?'badge-ok':'badge-danger'}">${c.type}</span></td><td>${c.source}</td><td>Rp ${c.amount.toLocaleString('id-ID')}</td><td>${c.time}</td></tr>`).join('');
+    document.getElementById('dashCashTable').innerHTML = (appData.cashflow || []).length === 0 ? '<tr><td colspan="4" style="text-align: center;">Belum ada transaksi</td></tr>' :
+      (appData.cashflow || []).slice(-5).reverse().map(c => `<tr><td><span class="badge ${c.type==='INCOME'?'badge-ok':'badge-danger'}">${c.type}</span></td><td>${c.source}</td><td>Rp ${c.amount.toLocaleString('id-ID')}</td><td>${c.time}</td></tr>`).join('');
 
     renderCashFlowTable();
 
-    document.getElementById('absensiHistoryTable').innerHTML = appData.absensiList.length === 0 ? '<tr><td colspan="6" style="text-align: center;">Belum ada absen</td></tr>' :
-      appData.absensiList.slice().reverse().map((a, i) => `<tr><td>${i+1}</td><td>${a.nama}</td><td>Shift ${a.shift}</td><td>Rp ${(a.modal||0).toLocaleString()}</td><td><span class="badge ${a.status==='MASUK'?'badge-ok':'badge-danger'}">${a.status}</span></td><td>${a.waktu}</td></tr>`).join('');
+    document.getElementById('absensiHistoryTable').innerHTML = (appData.absensiList || []).length === 0 ? '<tr><td colspan="6" style="text-align: center;">Belum ada absen</td></tr>' :
+      (appData.absensiList || []).slice().reverse().map((a, i) => `<tr><td>${i+1}</td><td>${a.nama}</td><td>Shift ${a.shift}</td><td>Rp ${(a.modal||0).toLocaleString()}</td><td><span class="badge ${a.status==='MASUK'?'badge-ok':'badge-danger'}">${a.status}</span></td><td>${a.waktu}</td></tr>`).join('');
 
     let alertCount = 0, alertHtml = '';
     const today = new Date();
-    Object.entries(appData.inventory).forEach(([k, v]) => {
+    Object.entries(appData.inventory || {}).forEach(([k, v]) => {
       const diffM = (new Date(v.expired) - today) / (1000*60*60*24*30);
       if (v.qty < 20 || diffM <= 3) {
         alertCount++;
@@ -859,9 +971,12 @@
     document.getElementById('criticalCount').textContent = alertCount;
     document.getElementById('kritisList').innerHTML = alertCount === 0 ? '<p style="text-align: center; color: #999;">✅ Semua stok aman</p>' : `<table><thead><tr><th>Kode</th><th>Nama</th><th>Stok</th><th>Ket</th></tr></thead><tbody>${alertHtml}</tbody></table>`;
 
-    document.getElementById('opnameTable').innerHTML = Object.entries(appData.inventory).map(([k, v], i) => `
-      <tr><td>${i+1}</td><td>${k}</td><td>${v.nama}</td><td>Rp ${v.harga.toLocaleString()}</td><td>${v.qty}</td><td>${v.expired}</td><td><button class="btn-danger" onclick="hapusProdukOpname('${k}')">Hapus</button></td></tr>
-    `).join('');
+    const opnameTbody = document.getElementById('opnameTable');
+    const invEntries = Object.entries(appData.inventory || {});
+    opnameTbody.innerHTML = invEntries.length === 0 ? '<tr><td colspan="7" style="text-align: center;">Belum ada produk/stok diinput. Silakan input melalui menu Input Stok.</td></tr>' :
+      invEntries.map(([k, v], i) => `
+        <tr><td>${i+1}</td><td>${k}</td><td>${v.nama}</td><td>Rp ${v.harga.toLocaleString()}</td><td>${v.qty}</td><td>${v.expired}</td><td><button class="btn-danger" onclick="hapusProdukOpname('${k}')">Hapus</button></td></tr>
+      `).join('');
   }
 </script>
 </body>
