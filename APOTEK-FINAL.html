@@ -3,17 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Full Stack POS & Local Growth Engine</title>
+  <title>Apotek Nugrah FARMA - Real-Time POS & Cloud System</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   
   <!-- Firebase SDK Compat -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-  <!-- Local SEO Meta Tags untuk Google Organic Search -->
-  <meta name="description" content="Apotek Nugrah FARMA adalah apotek terpercaya di Konawe Selatan dan Kendari yang menyediakan obat lengkap, alkes, resep dokter, dan pelayanan kesehatan profesional.">
-  <meta name="keywords" content="Apotek Nugrah Farma, Apotek di Kendari, Apotek Konawe Selatan, Beli Obat Kendari, Apotek Lengkap Moramo">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -77,13 +73,6 @@
     .btn-danger { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn-wa { background: #25d366; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; display: inline-block; text-align: center; text-decoration: none; width: 100%; margin-top: 10px; }
     
-    .social-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 15px; }
-    .soc-btn { padding: 10px; border-radius: 8px; border: none; color: white; font-weight: 600; cursor: pointer; font-size: 13px; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-fb { background: #1877f2; }
-    .btn-ig { background: #e1306c; }
-    .btn-tw { background: #000000; }
-    .btn-tg { background: #0088cc; }
-
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
     table thead { background: #f8f9fa; }
     table th { padding: 10px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #e0e0e0; }
@@ -120,7 +109,7 @@
   <div class="login-card">
     <div class="logo-container">💊</div>
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Kasir & Logika Integrasi Operasional</p>
+    <p>Sistem Kasir & Cloud Real-Time</p>
     <select id="loginRoleSelect" onchange="toggleLoginPinField()">
       <option value="kasir">🧑‍💼 Login Kasir (Operasional Kasir & Absen)</option>
       <option value="admin">👑 Login Owner / Admin (Full Akses & Laporan)</option>
@@ -477,9 +466,6 @@
 <iframe id="printFrame" style="display:none;"></iframe>
 
 <script>
-  // =========================================================================
-  // LOGIKA UTUH FULL STACK - CLOUD REAL-TIME SYNC & LOCAL ENGINE
-  // =========================================================================
   const firebaseConfig = {
     apiKey: "AIzaSyD-contoh-ganti-dengan-punyamu",
     authDomain: "apotek-nugrah-farma.firebaseapp.com",
