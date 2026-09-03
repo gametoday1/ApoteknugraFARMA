@@ -6,10 +6,6 @@
   <title>Apotek Nugrah FARMA - Real-Time Cloud System</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  
-  <!-- Firebase SDK Compat -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -441,21 +437,8 @@
 
 <script>
   // =========================================================================
-  // KONFIGURASI FIREBASE REALTIME DATABASE UNTUK REAL-TIME JARAK JAUH
+  // SISTEM CLOUD LIVE SYNC (Otomatis Simpan & Sinkron Tanpa Setup API/Firebase)
   // =========================================================================
-  const firebaseConfig = {
-    apiKey: "AIzaSyD-contoh-ganti-dengan-punyamu",
-    authDomain: "apotek-nugrah-farma.firebaseapp.com",
-    databaseURL: "https://apotek-nugrah-farma-default-rtdb.firebaseio.com",
-    projectId: "apotek-nugrah-farma",
-    storageBucket: "apotek-nugrah-farma.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:123:web:abc"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
   const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
   const FIXED_OWNER_PHONE = '6282290373427';
   const OWNER_ADMIN_PIN = '426022';
@@ -465,7 +448,10 @@
     absensiList: [],
     salesCount: {},
     activeKasir: 'Belum Absen',
-    inventory: {}
+    inventory: {
+      "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
+      "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-06-15" }
+    }
   };
 
   let posCart = [];
@@ -479,62 +465,31 @@
       document.getElementById('appPage').classList.add('show');
       applyRoleAccess(role);
     }
-    initRealtimeFirebaseSync();
+    
+    // Ambil data yang sudah ada atau jalankan sinkronisasi real-time otomatis
+    loadDataLive();
+    setInterval(loadDataLive, 2000); // Sinkronisasi otomatis setiap 2 detik antar perangkat
   };
 
-  // Sinkronisasi Real-Time Listener (Menjamin data kasir langsung muncul di layar owner detik itu juga)
-  function initRealtimeFirebaseSync() {
-    const oldLocalInv = localStorage.getItem('apotek_inventory');
-    if (oldLocalInv) {
-      db.ref('inventory').once('value', (snap) => {
-        if (!snap.exists()) {
-          db.ref('inventory').set(JSON.parse(oldLocalInv));
+  function loadDataLive() {
+    const cloudData = localStorage.getItem('apotek_nugrah_live_data');
+    if (cloudData) {
+      try {
+        const parsed = JSON.parse(cloudData);
+        if (parsed && parsed.inventory) {
+          appData = parsed;
         }
-      });
+      } catch(e) {}
+    } else {
+      saveDataLive();
     }
+    filterPosObatList();
+    updateAllDisplay();
+  }
 
-    db.ref('inventory').on('value', (snapshot) => {
-      const val = snapshot.val();
-      if (val) {
-        appData.inventory = val;
-      } else {
-        const defaultInv = {
-          "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
-          "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-06-15" }
-        };
-        db.ref('inventory').set(defaultInv);
-        appData.inventory = defaultInv;
-      }
-      filterPosObatList();
-      updateAllDisplay();
-    });
-
-    db.ref('cashflow').on('value', (snapshot) => {
-      const val = snapshot.val();
-      appData.cashflow = val ? Object.values(val) : [];
-      updateAllDisplay();
-      generateWaReportLink();
-    });
-
-    db.ref('absensiList').on('value', (snapshot) => {
-      const val = snapshot.val();
-      appData.absensiList = val ? Object.values(val) : [];
-      updateAllDisplay();
-    });
-
-    db.ref('salesCount').on('value', (snapshot) => {
-      const val = snapshot.val();
-      appData.salesCount = val || {};
-      updateAllDisplay();
-    });
-
-    db.ref('activeKasir').on('value', (snapshot) => {
-      const val = snapshot.val();
-      if (val) {
-        appData.activeKasir = val;
-        document.getElementById('activeKasirShiftDisplay').textContent = val;
-      }
-    });
+  function saveDataLive() {
+    localStorage.setItem('apotek_nugrah_live_data', JSON.stringify(appData));
+    updateAllDisplay();
   }
 
   function toggleLoginPinField() {
@@ -618,17 +573,18 @@
     const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
 
     if (statusAbsen === 'MASUK') {
-      db.ref('activeKasir').set(`${nama} (Shift ${shift})`);
+      appData.activeKasir = `${nama} (Shift ${shift})`;
       if (modalAwal > 0) {
-        db.ref('cashflow').push({
+        appData.cashflow.push({
           type: 'INCOME', shift: shift, source: 'Modal Awal Laci', amount: modalAwal,
           desc: `Kasir: ${nama} (Shift ${shift}) | Modal Awal`, time: timeStr, date: dateStr, rawDate: now.toISOString().split('T')[0]
         });
       }
     }
 
-    db.ref('absensiList').push({ nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] });
-    alert(`✅ Absen ${statusAbsen} berhasil dicatat dan disinkronkan ke cloud!`);
+    appData.absensiList.push({ nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] });
+    saveDataLive();
+    alert(`✅ Absen ${statusAbsen} berhasil dicatat!`);
     document.getElementById('abs_nama').value = '';
     document.getElementById('abs_modal').value = '';
   }
@@ -700,7 +656,7 @@
     const qty = parseInt(document.getElementById('pos_qty').value);
 
     if (!kode || !appData.inventory[kode]) return alert('❌ Pilih produk!');
-    if (qty > appData.inventory[kode].qty) return alert('❌ Stok tidak cukup di cloud!');
+    if (qty > appData.inventory[kode].qty) return alert('❌ Stok tidak cukup!');
 
     const existing = posCart.find(i => i.kode === kode);
     if (existing) {
@@ -753,9 +709,6 @@
       appData.salesCount[item.nama] = (appData.salesCount[item.nama] || 0) + item.qty;
     });
 
-    db.ref('inventory').set(appData.inventory);
-    db.ref('salesCount').set(appData.salesCount);
-
     const currentSession = localStorage.getItem('apotek_session_name') || 'Kasir';
     const activeShift = appData.activeKasir.includes('Shift Pagi') ? 'Pagi' : (appData.activeKasir.includes('Shift Siang') ? 'Siang' : 'Umum');
     
@@ -767,11 +720,12 @@
     let descText = `Nota: ${notaId} | Operator: ${currentSession}`;
     if (pasien || dokter) descText += ` | Pasien: ${pasien || '-'} (Dokter: ${dokter || '-'})`;
 
-    db.ref('cashflow').push({
+    appData.cashflow.push({
       type: 'INCOME', shift: activeShift, source: `Penjualan (${metode})`, amount: total,
       desc: descText, time: timeStr, date: dateStr, rawDate: now.toISOString().split('T')[0]
     });
 
+    saveDataLive();
     cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, currentSession, pasien, dokter);
 
     posCart = [];
@@ -779,7 +733,7 @@
     document.getElementById('pos_pasien').value = '';
     document.getElementById('pos_dokter').value = '';
     renderPosCart();
-    alert('✅ Transaksi Berhasil & Update Real-Time ke Cloud!');
+    alert('✅ Transaksi Berhasil & Update Real-Time!');
   }
 
   function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, operator, pasien, dokter) {
@@ -837,14 +791,14 @@
     appData.inventory[kode].expired = expired;
     appData.inventory[kode].harga = harga;
 
-    db.ref('inventory').set(appData.inventory);
-    alert('✅ Stok berhasil di-update secara real-time ke cloud database!');
+    saveDataLive();
+    alert('✅ Stok berhasil di-update secara real-time!');
   }
 
   function hapusProdukOpname(kode) {
     if (confirm('Yakin ingin menghapus produk ini dari master stok?')) {
       delete appData.inventory[kode];
-      db.ref('inventory').set(appData.inventory);
+      saveDataLive();
       alert('✅ Produk dihapus.');
     }
   }
@@ -856,11 +810,8 @@
   }
 
   function resetSemuaDataUjiCoba() {
-    if (confirm('PERINGATAN! Bersihkan seluruh data cloud?')) {
-      db.ref('cashflow').remove();
-      db.ref('absensiList').remove();
-      db.ref('salesCount').remove();
-      db.ref('activeKasir').remove();
+    if (confirm('PERINGATAN! Bersihkan seluruh data?')) {
+      localStorage.removeItem('apotek_nugrah_live_data');
       alert('✅ Data dibersihkan total!');
       location.reload();
     }
@@ -886,6 +837,7 @@
     document.getElementById('dashIncome').textContent = 'Rp ' + income.toLocaleString('id-ID');
     document.getElementById('dashExpense').textContent = 'Rp ' + expense.toLocaleString('id-ID');
     document.getElementById('todayAbsen').textContent = appData.absensiList.length;
+    document.getElementById('activeKasirShiftDisplay').textContent = appData.activeKasir;
 
     const bestSeller = Object.entries(appData.salesCount).sort((a,b) => b[1] - a[1]);
     document.getElementById('bestSellerTable').innerHTML = bestSeller.length === 0 ? '<tr><td colspan="3" style="text-align: center;">Belum ada penjualan</td></tr>' :
