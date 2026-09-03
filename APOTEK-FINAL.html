@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Nugrah FARMA - Sistem Kasir & Keamanan Ketat Owner</title>
+  <title>Apotek Nugrah FARMA - Sistem Kasir Realtime Cloud</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  
+  <!-- Firebase SDK (Modular v10 atau kompatibel) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
@@ -104,7 +109,7 @@
   <div class="login-card">
     <div class="logo-container">💊</div>
     <h1>APOTEK NUGRAH FARMA</h1>
-    <p>Sistem Pengamanan Ketat & Audit Owner</p>
+    <p>Sistem Cloud Real-Time Terpusat</p>
     <select id="loginRoleSelect" onchange="toggleLoginPinField()">
       <option value="kasir">🧑‍💼 Login Kasir (Operasional Kasir & Absen)</option>
       <option value="admin">👑 Login Owner / Admin (Full Akses & Laporan)</option>
@@ -281,8 +286,8 @@
     <!-- INPUT STOK & ALKES -->
     <div id="barcode" class="tab">
       <div class="card">
-        <h3>📦 Input Stok Produk / Alkes Baru (Tercatat di Audit Log)</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Pastikan HPP dan tanggal kedaluwarsa diinput akurat untuk keamanan audit obat.</p>
+        <h3>📦 Input Stok Produk / Alkes Baru (Tercatat di Database Cloud)</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Setiap inputan stok akan langsung terpantau oleh Owner secara real-time.</p>
         
         <div class="form-grid">
           <div class="form-group">
@@ -313,7 +318,7 @@
             <input type="date" id="bc_expired">
           </div>
         </div>
-        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan & Catat ke Sistem</button>
+        <button class="btn-submit" onclick="simpanStokBarcode()">Simpan ke Cloud Database</button>
       </div>
     </div>
     
@@ -321,7 +326,7 @@
     <div id="cashflow" class="tab">
       <div class="card">
         <h3>📊 Laporan Cash Flow, Rekap Shift & Keuangan 👑</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Menu eksklusif Owner untuk memantau omset harian dan rekap berdasarkan Shift Pagi / Siang.</p>
+        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Pantau omset harian dan rekap shift secara live langsung dari server cloud.</p>
         
         <div class="form-grid" style="margin-bottom: 15px;">
           <div class="form-group">
@@ -351,7 +356,7 @@
             <tr><th>No</th><th>Jenis</th><th>Shift</th><th>Keterangan Lengkap</th><th>Nominal</th><th>Waktu</th></tr>
           </thead>
           <tbody id="cashflowTable">
-            <tr><td colspan="6" style="text-align: center;">Belum ada data</td></tr>
+            <tr><td colspan="6" style="text-align: center;">Memuat data dari server...</td></tr>
           </tbody>
         </table>
       </div>
@@ -362,7 +367,7 @@
       <div class="card">
         <h3>⚠️ Peringatan Dini Stok Kritis & Obat Mendekati Kadaluwarsa</h3>
         <div id="kritisList">
-          <p style="text-align: center; color: #999;">✅ Semua stok aman</p>
+          <p style="text-align: center; color: #999;">⏳ Memeriksa data stok...</p>
         </div>
       </div>
     </div>
@@ -376,7 +381,7 @@
             <tr><th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga Jual</th><th>Stok</th><th>Expired</th><th>Aksi Hapus</th></tr>
           </thead>
           <tbody id="opnameTable">
-            <tr><td colspan="7" style="text-align: center;">-</td></tr>
+            <tr><td colspan="7" style="text-align: center;">Memuat master stok...</td></tr>
           </tbody>
         </table>
       </div>
@@ -421,7 +426,7 @@
             <tr><th>No</th><th>Nama Karyawan</th><th>Shift</th><th>Modal Awal</th><th>Status</th><th>Waktu & GPS</th></tr>
           </thead>
           <tbody id="absensiHistoryTable">
-            <tr><td colspan="6" style="text-align: center;">Belum ada riwayat absensi</td></tr>
+            <tr><td colspan="6" style="text-align: center;">Memuat riwayat absen...</td></tr>
           </tbody>
         </table>
       </div>
@@ -430,10 +435,10 @@
     <!-- PENGATURAN OWNER (PROTECTED) -->
     <div id="akun" class="tab">
       <div class="card">
-        <h3>⚙️ Pengaturan & Backup Data Keamanan Owner 👑</h3>
+        <h3>⚙️ Pengaturan & Backup Data Cloud Owner 👑</h3>
         <p style="font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 15px;">
-          Apotek Nugrah FARMA beroperasi dengan standar pengamanan data lokal dan audit berlapis.<br>
-          Gunakan tombol di bawah untuk mencadangkan data atau mereset seluruh data transaksi uji coba.
+          Apotek Nugrah FARMA terhubung ke server database cloud secara real-time.<br>
+          Gunakan tombol di bawah untuk mencadangkan database atau mereset seluruh data transaksi uji coba.
         </p>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <button class="btn-submit" style="width: auto; padding: 10px 20px; background: #2a5298;" onclick="downloadBackupData()">💾 Download Backup Data (JSON)</button>
@@ -448,19 +453,37 @@
 <iframe id="printFrame" style="display:none;"></iframe>
 
 <script>
+  // ==========================================
+  // KONFIGURASI FIREBASE CLOUD DATABASE
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-contoh-api-key-ganti-dengan-punyamu",
+    authDomain: "apotek-nugrah-farma.firebaseapp.com",
+    databaseURL: "https://apotek-nugrah-farma-default-rtdb.firebaseio.com",
+    projectId: "apotek-nugrah-farma",
+    storageBucket: "apotek-nugrah-farma.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcde"
+  };
+
+  // Inisialisasi Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
 let map = null;
 let marker = null;
 const APOTEK_LOCATION = { lat: -4.1333, lng: 122.5167, name: 'Apotek Nugrah Farma, Konawe Selatan' };
 const FIXED_APOTEK_NAME = 'Apotek Nugrah FARMA';
 const FIXED_OWNER_PHONE = '6282290373427';
-const OWNER_ADMIN_PIN = '426022'; // PIN rahasia khusus Owner
+const OWNER_ADMIN_PIN = '426022';
 
+// Global Data State dari Cloud
 let appData = {
-  cashflow: JSON.parse(localStorage.getItem('apotek_cashflow')) || [],
-  absensiList: JSON.parse(localStorage.getItem('apotek_absensi')) || [],
-  salesCount: JSON.parse(localStorage.getItem('apotek_sales_count')) || {},
-  activeKasir: localStorage.getItem('apotek_active_kasir') || 'Belum Absen',
-  inventory: JSON.parse(localStorage.getItem('apotek_inventory')) || {
+  cashflow: [],
+  absensiList: [],
+  salesCount: {},
+  activeKasir: 'Belum Absen',
+  inventory: {
     "89999991": { nama: "Paracetamol 500mg", qty: 50, harga: 5000, expired: "2027-12-31" },
     "89999992": { nama: "Amoxicillin 500mg", qty: 8, harga: 12000, expired: "2026-06-15" },
     "ALK001": { nama: "Tensimeter Digital OneMed", qty: 15, harga: 250000, expired: "2030-01-01" }
@@ -475,12 +498,57 @@ window.onload = function() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('appPage').classList.add('show');
     applyRoleAccess(role);
-    loadActiveKasir();
+  }
+  
+  // Sinkronisasi Real-Time dari Firebase Cloud Database
+  initRealtimeSync();
+};
+
+function initRealtimeSync() {
+  // Listener Inventory (Stok)
+  db.ref('inventory').on('value', (snapshot) => {
+    const val = snapshot.val();
+    if (val) {
+      appData.inventory = val;
+    } else {
+      // Set default jika database masih kosong
+      db.ref('inventory').set(appData.inventory);
+    }
     filterPosObatList();
     updateAllDisplay();
-  }
-  generateWaReportLink();
-};
+  });
+
+  // Listener Cashflow (Keuangan)
+  db.ref('cashflow').on('value', (snapshot) => {
+    const val = snapshot.val();
+    appData.cashflow = val ? Object.values(val) : [];
+    updateAllDisplay();
+    generateWaReportLink();
+  });
+
+  // Listener Absensi
+  db.ref('absensiList').on('value', (snapshot) => {
+    const val = snapshot.val();
+    appData.absensiList = val ? Object.values(val) : [];
+    updateAllDisplay();
+  });
+
+  // Listener Sales Count (Penjualan Terlaris)
+  db.ref('salesCount').on('value', (snapshot) => {
+    const val = snapshot.val();
+    appData.salesCount = val || {};
+    updateAllDisplay();
+  });
+
+  // Listener Active Kasir
+  db.ref('activeKasir').on('value', (snapshot) => {
+    const val = snapshot.val();
+    if (val) {
+      appData.activeKasir = val;
+      document.getElementById('activeKasirShiftDisplay').textContent = val;
+    }
+  });
+}
 
 function toggleLoginPinField() {
   const role = document.getElementById('loginRoleSelect').value;
@@ -511,9 +579,6 @@ function doLogin() {
   document.getElementById('appPage').classList.add('show');
   
   applyRoleAccess(role);
-  loadActiveKasir();
-  filterPosObatList();
-  updateAllDisplay();
 }
 
 function applyRoleAccess(role) {
@@ -592,11 +657,12 @@ function catatAbsensi(statusAbsen) {
   const dateStr = now.getDate() + '/' + (now.getMonth()+1) + '/' + now.getFullYear();
 
   if (statusAbsen === 'MASUK') {
-    appData.activeKasir = `${nama} (Shift ${shift})`;
-    localStorage.setItem('apotek_active_kasir', appData.activeKasir);
+    const activeText = `${nama} (Shift ${shift})`;
+    db.ref('activeKasir').set(activeText);
     
     if (modalAwal > 0) {
-      appData.cashflow.push({
+      const newCashflowRef = db.ref('cashflow').push();
+      newCashflowRef.set({
         type: 'INCOME',
         shift: shift,
         source: 'Modal Awal Laci',
@@ -606,27 +672,15 @@ function catatAbsensi(statusAbsen) {
         date: dateStr,
         rawDate: now.toISOString().split('T')[0]
       });
-      localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
     }
   }
 
   const absenObj = { nama, shift, modal: modalAwal, status: statusAbsen, waktu: `${dateStr} ${timeStr}`, rawDate: now.toISOString().split('T')[0] };
-  appData.absensiList.push(absenObj);
-  localStorage.setItem('apotek_absensi', JSON.stringify(appData.absensiList));
+  db.ref('absensiList').push(absenObj);
 
-  loadActiveKasir();
-  updateAllDisplay();
-  alert(`✅ Absen ${statusAbsen} berhasil dicatat untuk ${nama} (Shift ${shift})!`);
+  alert(`✅ Absen ${statusAbsen} berhasil dicatat dan disinkronkan ke cloud untuk ${nama}!`);
   document.getElementById('abs_nama').value = '';
   document.getElementById('abs_modal').value = '';
-}
-
-function loadActiveKasir() {
-  const saved = localStorage.getItem('apotek_active_kasir');
-  if (saved) {
-    appData.activeKasir = saved;
-    document.getElementById('activeKasirShiftDisplay').textContent = saved;
-  }
 }
 
 function generateWaReportLink() {
@@ -640,7 +694,7 @@ function generateWaReportLink() {
   text += `💸 Total Pengeluaran: Rp ${expense.toLocaleString('id-ID')}%0A`;
   text += `✋ Total Aktivitas Absen: ${totalAbsen} orang%0A`;
   text += `-----------------------------------%0A`;
-  text += `_Laporan aman terkunci otomatis._`;
+  text += `_Data sinkron real-time via Cloud Database._`;
 
   const waUrl = `https://api.whatsapp.com/send?phone=${FIXED_OWNER_PHONE}&text=${text}`;
   const btn = document.getElementById('btnKirimWaOwner');
@@ -714,7 +768,7 @@ function tambahKeKeranjang() {
   const qty = parseInt(document.getElementById('pos_qty').value);
 
   if (!kode || !appData.inventory[kode]) return alert('❌ Pilih produk!');
-  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup di sistem!`);
+  if (qty > appData.inventory[kode].qty) return alert(`❌ Stok tidak cukup di cloud!`);
 
   const existing = posCart.find(i => i.kode === kode);
   if (existing) {
@@ -762,6 +816,7 @@ function prosesTransaksiKasir() {
     kembali = bayar - total;
   }
 
+  // Update Inventory di Cloud
   posCart.forEach(item => {
     appData.inventory[item.kode].qty -= item.qty;
     if (!appData.salesCount[item.nama]) {
@@ -770,8 +825,8 @@ function prosesTransaksiKasir() {
     appData.salesCount[item.nama] += item.qty;
   });
 
-  localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
-  localStorage.setItem('apotek_sales_count', JSON.stringify(appData.salesCount));
+  db.ref('inventory').set(appData.inventory);
+  db.ref('salesCount').set(appData.salesCount);
 
   const currentSession = localStorage.getItem('apotek_session_name') || 'Kasir';
   const activeShift = appData.activeKasir.includes('Shift Pagi') ? 'Pagi' : (appData.activeKasir.includes('Shift Siang') ? 'Siang' : 'Umum');
@@ -788,8 +843,7 @@ function prosesTransaksiKasir() {
   }
 
   const txObj = { type: 'INCOME', shift: activeShift, source: `Penjualan (${metode})`, amount: total, desc: descText, time: timeStr, date: dateStr, rawDate: rawDateStr };
-  appData.cashflow.push(txObj);
-  localStorage.setItem('apotek_cashflow', JSON.stringify(appData.cashflow));
+  db.ref('cashflow').push(txObj);
 
   cetakStrukThermal(posCart, total, bayar, kembali, metode, timeStr, dateStr, notaId, currentSession, pasien, dokter);
 
@@ -798,8 +852,7 @@ function prosesTransaksiKasir() {
   document.getElementById('pos_pasien').value = '';
   document.getElementById('pos_dokter').value = '';
   renderPosCart();
-  updateAllDisplay();
-  alert(`✅ Transaksi ${notaId} Berhasil & Tercatat di Audit Log Owner!`);
+  alert(`✅ Transaksi ${notaId} Berhasil & Tersinkron Real-Time ke Owner!`);
 }
 
 function cetakStrukThermal(items, total, bayar, kembali, metode, time, date, notaId, operator, pasien, dokter) {
@@ -878,25 +931,24 @@ function simpanStokBarcode() {
   const expired = document.getElementById('bc_expired').value;
 
   if (!kode || !obat || !expired) return alert('❌ Lengkapi data produk dan tanggal expired!');
+  
   if (!appData.inventory[kode]) {
     appData.inventory[kode] = { nama: obat, qty: 0, harga: harga, expired: expired };
   }
   appData.inventory[kode].qty += (jenis === 'MASUK' ? qty : -qty);
   appData.inventory[kode].expired = expired;
+  appData.inventory[kode].harga = harga;
 
-  localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
-  filterPosObatList();
-  updateAllDisplay();
-  alert('✅ Stok produk berhasil diperbarui dan tercatat aman!');
+  db.ref('inventory').set(appData.inventory);
+  alert('✅ Stok berhasil disimpan ke cloud database dan langsung terpantau Owner!');
 }
 
 function hapusProdukOpname(kode) {
   const pin = prompt('🔐 Masukkan PIN Owner untuk menghapus produk master:');
   if (pin === OWNER_ADMIN_PIN) {
     delete appData.inventory[kode];
-    localStorage.setItem('apotek_inventory', JSON.stringify(appData.inventory));
-    updateAllDisplay();
-    alert('✅ Produk berhasil dihapus dari sistem.');
+    db.ref('inventory').set(appData.inventory);
+    alert('✅ Produk berhasil dihapus dari cloud.');
   } else if (pin !== null) {
     alert('❌ PIN Owner salah!');
   }
@@ -906,23 +958,23 @@ function downloadBackupData() {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `Backup_Apotek_Nugrah_Farma_${new Date().toISOString().split('T')[0]}.json`);
+  downloadAnchor.setAttribute("download", `Backup_Cloud_Apotek_Nugrah_${new Date().toISOString().split('T')[0]}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
 }
 
 function resetSemuaDataUjiCoba() {
-  const pin = prompt('🔐 PERINGATAN! Ini akan membersihkan seluruh data transaksi, cash flow, dan absensi uji coba. Masukkan PIN Owner (426022):');
+  const pin = prompt('🔐 PERINGATAN! Ini akan membersihkan seluruh data cloud. Masukkan PIN Owner (426022):');
   if (pin === OWNER_ADMIN_PIN) {
-    localStorage.removeItem('apotek_cashflow');
-    localStorage.removeItem('apotek_absensi');
-    localStorage.removeItem('apotek_sales_count');
-    localStorage.removeItem('apotek_active_kasir');
-    alert('✅ Data uji coba berhasil dibersihkan total! Sistem siap digunakan.');
+    db.ref('cashflow').remove();
+    db.ref('absensiList').remove();
+    db.ref('salesCount').remove();
+    db.ref('activeKasir').remove();
+    alert('✅ Seluruh data uji coba di Cloud Database berhasil dibersihkan total!');
     location.reload();
   } else if (pin !== null) {
-    alert('❌ PIN Owner salah! Reset dibatalkan.');
+    alert('❌ PIN Owner salah!');
   }
 }
 
@@ -1039,8 +1091,6 @@ function updateAllDisplay() {
       <td><button class="btn-danger" onclick="hapusProdukOpname('${kode}')">Hapus</button></td>
     </tr>
   `).join('');
-
-  generateWaReportLink();
 }
 </script>
 </body>
