@@ -23,10 +23,9 @@ function saveUsers(users) {
 }
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'APOTEK-FINAL_2.html'));
+    res.sendFile(path.join(__dirname, 'APOTEK-FINAL.html'));
 });
 
-// Endpoint Login yang toleran terhadap nama field frontend (bisa email atau username)
 app.post('/login', (req, res) => {
     const emailOrUser = req.body.email || req.body.username || req.body.user;
     const password = req.body.password;
@@ -49,7 +48,6 @@ app.post('/login', (req, res) => {
     res.json({ success: true, message: "Login berhasil!", role: foundUser.role });
 });
 
-// Endpoint Register yang fleksibel
 app.post('/register', (req, res) => {
     const emailOrUser = req.body.email || req.body.username || req.body.user;
     const password = req.body.password;
