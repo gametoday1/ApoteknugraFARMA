@@ -467,15 +467,13 @@
 
 <script>
   const firebaseConfig = {
-   const firebaseConfig = {
-  apiKey: "AIzaSyDWY9x_GV7kgQHAIRAn403uqZzd4lSXgOk",
-  authDomain: "apotek-nugrah-farma.firebaseapp.com",
-  databaseURL: "https://apotek-nugrah-farma-default-rtdb.firebaseio.com",
-  projectId: "apotek-nugrah-farma",
-  storageBucket: "apotek-nugrah-farma.firebasestorage.app",
-  messagingSenderId: "681758259651",
-  appId: "1:681758259651:web:a7ca612ac382c531896576"
-};
+    apiKey: "AIzaSyDWY9x_GV7kgQHAIRAn403uZzd4lSXgOk",
+    authDomain: "apotek-nugrah-farma.firebaseapp.com",
+    databaseURL: "https://apotek-nugrah-farma-default-rtdb.firebaseio.com",
+    projectId: "apotek-nugrah-farma",
+    storageBucket: "apotek-nugrah-farma.appspot.com",
+    messagingSenderId: "681758259651",
+    appId: "1:681758259651:web:a7ca612ac382c531896576"
   };
 
   try { firebase.initializeApp(firebaseConfig); } catch(e) {}
@@ -507,6 +505,12 @@
     initCompleteSystemSync();
     generateViralCaption();
   };
+
+  function doLogout() {
+    localStorage.removeItem('apotek_role');
+    localStorage.removeItem('apotek_session_name');
+    location.reload();
+  }
 
   function generateViralCaption() {
     const type = document.getElementById('promoType').value;
